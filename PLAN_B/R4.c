@@ -126,9 +126,11 @@ task flyWheel () {
 }
 task lifter () { // task controlling the cascade-lift an the claw
 	while (true) {
-		if (vexRT[Btn5U] && !vexRT[Btn5D]) {
+		if (vexRT[Btn5U] && vexRT[Btn5D]) {
+			motor[mLift] = 0;
+		}	else if (vexRT[Btn5U]) {
 			motor[mLift] = 127;
-		} else if (!vexRT[Btn5U] && vexRT[Btn5D]) {
+		} else if (vexRT[Btn5D]) {
 			motor[mLift] = -127;
 		} else {
 			motor[mLift] = 0;
@@ -206,7 +208,7 @@ task drive() {
 		}
 		if (vexRT[Btn7L]) { // flip head
     	while (vexRT[Btn7L]) { wait1Msec(10);}
-      headFlip = -1;
+      headFlip = -headFlip;
     }
 		// Make sure at least one of the motors is running at full spead
 		/*
@@ -234,7 +236,7 @@ task drive() {
 }
 
 task usercontrol() {
-	//startTask(drive);
+	startTask(drive);
 	startTask(ballIntake);
 	startTask(flyWheel);
 	startTask(lifter);
