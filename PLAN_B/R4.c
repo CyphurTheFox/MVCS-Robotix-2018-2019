@@ -1,11 +1,11 @@
 #pragma config(Sensor, in2,    potClaw,        sensorPotentiometer)
-#pragma config(Sensor, dgtl1,  LED,            sensorLEDtoVCC)
-#pragma config(Sensor, dgtl2,  encLift,        sensorQuadEncoder)
-#pragma config(Sensor, dgtl4,  encFR,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl6,  encFL,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl8,  encBL,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl10, encFL,          sensorQuadEncoder)
-#pragma config(Motor,  port1,           mFL,           tmotorVex393_HBridge, openLoop)
+#pragma config(Sensor, dgtl1,  encLift,        sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  LED,            sensorLEDtoVCC)
+#pragma config(Sensor, dgtl5,  encFR,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl7,  encBL,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl9,  encBR,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
+#pragma config(Motor,  port1,           mFL,           tmotorVex393_HBridge, openLoop, reversed)
 #pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           mIntake,       tmotorVex393_MC29, openLoop)
@@ -195,8 +195,8 @@ task drive() {
       BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vexRT[Ch1];
       BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vexRT[Ch1];
 
-			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 120 &&
-				 sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 120) {
+			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 90 &&
+				 sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 90) {
 				driveFactor = 0.5;
 			} else {
 				driveFactor = 1.0;
