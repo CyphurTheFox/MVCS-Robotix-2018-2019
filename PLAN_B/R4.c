@@ -213,8 +213,8 @@ task drive() {
 			driveFactor = 0;
 		} else {
 			vch1 = vexRT[Ch1];
-			if (abs (vch1) < 90) {
-				vch1 /= 2;
+			if (abs (vch1) < 90 && abs(vch1) > 20) {
+				vch1 = vch1 > 0 ? 70 : -70;
 			}
 			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vch1; //Determines motor speeds. Joshua's Code.
       FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vch1;
