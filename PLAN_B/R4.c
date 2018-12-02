@@ -153,6 +153,26 @@ void moveClawDown (int toPos) {
 	motor[mClaw] = 0;
 }
 
+int targetClawPos = 2050, curClawPos;
+void flipOnBot () {
+	while (true) {
+		if ((vexRT[Btn5U] && vexRT[Btn5D]) && (vexRT[Btn7U] || vexRT[Btn7D]) ||
+				 vexRT[Btn7U] || vexRT[Btn7R]) {
+			break;
+		}
+		curClawPos = SensorValue[potClaw];
+		if (curClawPos < targetClawPos - 127) {
+			motor[mClaw] = 127;
+		} else if (curClawPos < targetClawPos) {
+			motor[mClaw] = (targetClawPos - curClawPos);
+		} else if (curClawPos < targetClawPos + 300) {
+			motor[mClaw] = 10;
+		} else {
+			motor[mClaw] = -10;
+		}
+	}
+}
+
 task claw () {
 	while (true) {
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
@@ -172,7 +192,8 @@ task claw () {
 				moveClawDown (580);
 			}
 			if (vexRT[Btn7D]) { // flip on bot
-				moveClawUp (2000); // change this number to change the target pot position
+				//moveClawUp (2000); // change this number to change the target pot position
+				flipOnBot();
 			}
 		}
 		EndTimeSlice();
@@ -184,16 +205,21 @@ float fmax (float a, float b) {
 }
 
 task drive() {
+	int vch1;
 	while (true) {
 		driveFactor = __DRIVE_SPEED_FACTOR_SLOW;
     // Death zones
 		if (abs(vexRT[Ch4]) < 20 && abs(vexRT[Ch3]) < 20 && abs(vexRT[Ch1]) < 20) {
 			driveFactor = 0;
 		} else {
-			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vexRT[Ch1]; //Determines motor speeds. Joshua's Code.
-      FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vexRT[Ch1];
-      BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vexRT[Ch1];
-      BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vexRT[Ch1];
+			vch1 = vexRT[Ch1];
+			if (abs (vch1) < 90) {
+				vch1 /= 2;
+			}
+			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vch1; //Determines motor speeds. Joshua's Code.
+      FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vch1;
+      BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vch1;
+      BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vch1;
 
 			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 90 &&
 				 sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 90) {
