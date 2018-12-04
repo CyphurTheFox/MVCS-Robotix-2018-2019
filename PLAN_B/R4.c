@@ -153,6 +153,7 @@ void moveClawDown (int toPos) {
 	motor[mClaw] = 0;
 }
 
+
 int curClawPos;
 
 void initClawMovement (int toPos) {
@@ -189,7 +190,7 @@ task claw () {
 				motor[mClaw] = 0;
 			}
 		} else {
-			if (SensorValue[encLift] < -250 && SensorValue[potClaw] < 1000) {
+			if (SensorValue[encLift] < -400 && SensorValue[potClaw] < 800) {
 				initClawMovement (900);
 			} else {
 				motor[mClaw] = 0;
