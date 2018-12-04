@@ -193,6 +193,9 @@ task claw () {
 			if (SensorValue[encLift] < -400 && SensorValue[potClaw] < 800) {
 				initClawMovement (900);
 			} else {
+				if (SensorValue[encLift] > -370 && SensorValue[potClaw] > 800) {
+					moveClawDown (580);
+				}
 				motor[mClaw] = 0;
 			}
 			if (vexRT[Btn7R]) {
