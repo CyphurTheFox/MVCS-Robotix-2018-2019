@@ -148,28 +148,33 @@ void moveClawUp (int toPos) {
 void moveClawDown (int toPos) {
 	clearTimer(T1); // set timer in order to prevent burning out motors
 	while (SensorValue[potClaw] > toPos && time1[T1] < 3000) {
-		motor[mClaw] = -127;
+		motor[mClaw] = -77;
 	}
 	motor[mClaw] = 0;
 }
 
-int targetClawPos = 2050, curClawPos;
+int curClawPos;
+
+void initClawMovement (int toPos) {
+	curClawPos = SensorValue[potClaw];
+	if (curClawPos < toPos - 127) {
+		motor[mClaw] = 127;
+	} else if (curClawPos < toPos) {
+		motor[mClaw] = (toPos - curClawPos);
+	} else if (curClawPos < toPos + 300) {
+		motor[mClaw] = 10;
+	} else {
+		motor[mClaw] = -10;
+	}
+}
+
 void flipOnBot () {
 	while (true) {
 		if ((vexRT[Btn5U] && vexRT[Btn5D]) && (vexRT[Btn7U] || vexRT[Btn7D]) ||
 				 vexRT[Btn7U] || vexRT[Btn7R]) {
 			break;
 		}
-		curClawPos = SensorValue[potClaw];
-		if (curClawPos < targetClawPos - 127) {
-			motor[mClaw] = 127;
-		} else if (curClawPos < targetClawPos) {
-			motor[mClaw] = (targetClawPos - curClawPos);
-		} else if (curClawPos < targetClawPos + 300) {
-			motor[mClaw] = 10;
-		} else {
-			motor[mClaw] = -10;
-		}
+		initClawMovement (2050);
 	}
 }
 
@@ -184,6 +189,11 @@ task claw () {
 				motor[mClaw] = 0;
 			}
 		} else {
+			if (SensorValue[encLift] < -250 && SensorValue[potClaw] < 1000) {
+				initClawMovement (900);
+			} else {
+				motor[mClaw] = 0;
+			}
 			if (vexRT[Btn7R]) {
 				moveClawDown (580);
 			}
@@ -193,6 +203,8 @@ task claw () {
 			}
 			if (vexRT[Btn7D]) { // flip on bot
 				//moveClawUp (2000); // change this number to change the target pot position
+				moveClawUp (2150);
+				motor[mClaw] = 0;
 				flipOnBot();
 			}
 		}
