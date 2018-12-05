@@ -188,7 +188,7 @@ void flipOnBot () {
 	clawInAction = false;
 }
 
-bool clawAssistOn = false;
+bool clawAssistOn = false, clawInManualControl = false;
 task clawAssist () {
 	while (true) {
 		if (vexRT[Btn7R]) {
@@ -196,7 +196,7 @@ task clawAssist () {
 			clawAssistOn = !clawAssistOn;
 			moveClawDown (600);
 		}
-		if (clawAssistOn && !clawInAction) {
+		if (clawAssistOn && !clawInAction && !clawInManualControl) {
 			initClawMovement (900);
 		}
 		EndTimeSlice ();
@@ -207,10 +207,13 @@ task claw () {
 	while (true) {
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
 			if (vexRT[Btn7U]) {
+				clawInManualControl = true;
 				motor[mClaw] = 127;
 			} else if (vexRT[Btn7D]) {
+				clawInManualControl = true;
 				motor[mClaw] = -127;
 			} else {
+				clawInManualControl = false;
 				motor[mClaw] = 0;
 			}
 		} else {
