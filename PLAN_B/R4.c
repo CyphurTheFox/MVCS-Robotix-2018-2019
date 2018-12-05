@@ -25,7 +25,7 @@
 8D: Set flyWheel zero speed (turn off)
 *there is no flyWheel toggle button
 
-see line 174 for adjusting flipbot function
+7R: Toggle assist
 
 */
 
@@ -138,44 +138,68 @@ task lifter () { // task controlling the cascade-lift an the claw
 	}
 }
 
+bool clawInAction = false;
+
 void moveClawUp (int toPos) {
+	clawInAction = true;
 	clearTimer(T1); // set timer in order to prevent burning out motors
 	while (SensorValue[potClaw] < toPos && time1[T1] < 3000) {
 		motor[mClaw] = 127;
 	}
 	motor[mClaw] = 0;
+	clawInAction = false;
 }
 void moveClawDown (int toPos) {
+	clawInAction = true;
 	clearTimer(T1); // set timer in order to prevent burning out motors
 	while (SensorValue[potClaw] > toPos && time1[T1] < 3000) {
 		motor[mClaw] = -77;
 	}
 	motor[mClaw] = 0;
+	clawInAction = false;
 }
-
 
 int curClawPos;
 
 void initClawMovement (int toPos) {
 	curClawPos = SensorValue[potClaw];
-	if (curClawPos < toPos - 127) {
+	if (curClawPos < toPos) {
 		motor[mClaw] = 127;
-	} else if (curClawPos < toPos) {
-		motor[mClaw] = (toPos - curClawPos);
-	} else if (curClawPos < toPos + 300) {
-		motor[mClaw] = 10;
+	} else if (curClawPos < toPos + 100) {
+		motor[mClaw] = 60;//(toPos - curClawPos) / 2;
+	} else if (curClawPos < toPos + 227) {
+		motor[mClaw] = 10;//(curClawPos - toPos) * 1;
+	} else if (curClawPos < toPos + 500) {
+		motor[mClaw] = 0;
 	} else {
 		motor[mClaw] = -10;
 	}
 }
 
 void flipOnBot () {
+	clawInAction = true;
 	while (true) {
 		if ((vexRT[Btn5U] && vexRT[Btn5D]) && (vexRT[Btn7U] || vexRT[Btn7D]) ||
 				 vexRT[Btn7U] || vexRT[Btn7R]) {
 			break;
 		}
-		initClawMovement (2050);
+		initClawMovement (1950);
+	}
+	clawInAction = false;
+}
+
+bool clawAssistOn = false;
+task clawAssist () {
+	while (true) {
+		if (vexRT[Btn7R]) {
+			while (vexRT[Btn7R]) { }
+			clawAssistOn = !clawAssistOn;
+			moveClawDown (600);
+		}
+		if (clawAssistOn && !clawInAction) {
+			initClawMovement (900);
+		}
+		EndTimeSlice ();
 	}
 }
 
@@ -190,20 +214,12 @@ task claw () {
 				motor[mClaw] = 0;
 			}
 		} else {
-			if (SensorValue[encLift] < -400 && SensorValue[potClaw] < 800) {
-				initClawMovement (900);
-			} else {
-				if (SensorValue[encLift] > -370 && SensorValue[potClaw] > 800) {
-					moveClawDown (580);
-				}
-				motor[mClaw] = 0;
-			}
 			if (vexRT[Btn7R]) {
-				moveClawDown (580);
+				moveClawDown (600);
 			}
 			if (vexRT[Btn7U]) { // flip on ground
-				moveClawUp (2500);
-				moveClawDown (580);
+				moveClawUp (1500);
+				moveClawDown (600);
 			}
 			if (vexRT[Btn7D]) { // flip on bot
 				//moveClawUp (2000); // change this number to change the target pot position
@@ -216,10 +232,6 @@ task claw () {
 	}
 }
 
-float fmax (float a, float b) {
-	return a > b ? a : b;
-}
-
 task drive() {
 	int vch1;
 	while (true) {
@@ -229,16 +241,16 @@ task drive() {
 			driveFactor = 0;
 		} else {
 			vch1 = vexRT[Ch1];
-			if (abs (vch1) < 90 && abs(vch1) > 20) {
-				vch1 = vch1 > 0 ? 70 : -70;
+			if (abs (vch1) < 100 && abs(vch1) > 20) {
+				vch1 = vch1 > 0 ? 60 : -60;
 			}
 			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vch1; //Determines motor speeds. Joshua's Code.
       FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vch1;
       BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vch1;
       BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vch1;
 
-			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 90 &&
-				 sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 90) {
+			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 100 &&
+				 sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 100) {
 				driveFactor = 0.5;
 			} else {
 				driveFactor = 1.0;
@@ -280,6 +292,7 @@ task usercontrol() {
 	startTask(flyWheel);
 	startTask(lifter);
 	startTask(claw);
+	startTask(clawAssist);
 	startTask(LED_Update);
   while (true) {
     EndTimeSlice();
