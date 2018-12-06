@@ -1,3 +1,5 @@
+
+
 #pragma config(Sensor, in2,    Claw,           sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  LED,            sensorLEDtoVCC)
 #pragma config(Sensor, dgtl3,  quadLift,       sensorQuadEncoder)
