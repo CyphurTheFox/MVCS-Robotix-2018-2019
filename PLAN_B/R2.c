@@ -5,11 +5,11 @@
 #pragma config(Sensor, dgtl7,  encBL,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl9,  encBR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
-#pragma config(Motor,  port1,           mFL,           tmotorVex393_HBridge, openLoop, reversed)
+#pragma config(Motor,  port1,           mFL,           tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           mIntake,       tmotorVex393_MC29, openLoop)
-#pragma config(Motor,  port5,           mLift,         tmotorVex393_MC29, openLoop, reversed)
+#pragma config(Motor,  port5,           mLift,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port6,           mFR,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port7,           mClaw,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port8,           mFlyWheelR,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -158,7 +158,7 @@ void moveClawDown (int toPos) {
 	motor[mClaw] = 0;
 	clawInAction = false;
 }
-
+/*
 int curClawPos;
 
 void initClawMovement (int toPos) {
@@ -202,21 +202,22 @@ task clawAssist () {
 		EndTimeSlice ();
 	}
 }
-
+*/
 task claw () {
 	while (true) {
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
 			if (vexRT[Btn7U]) {
-				clawInManualControl = true;
+				//clawInManualControl = true;
 				motor[mClaw] = 127;
 			} else if (vexRT[Btn7D]) {
-				clawInManualControl = true;
+				//clawInManualControl = true;
 				motor[mClaw] = -127;
 			} else {
-				clawInManualControl = false;
+				//clawInManualControl = false;
 				motor[mClaw] = 0;
 			}
 		} else {
+		/*
 			if (vexRT[Btn7R]) {
 				moveClawDown (600);
 			}
@@ -230,6 +231,7 @@ task claw () {
 				motor[mClaw] = 0;
 				flipOnBot();
 			}
+			*/
 		}
 		EndTimeSlice();
 	}
@@ -295,7 +297,7 @@ task usercontrol() {
 	startTask(flyWheel);
 	startTask(lifter);
 	startTask(claw);
-	startTask(clawAssist);
+	//startTask(clawAssist);
 	startTask(LED_Update);
   while (true) {
     EndTimeSlice();

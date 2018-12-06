@@ -1,3 +1,5 @@
+
+
 #pragma config(Sensor, in2,    Claw,           sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  LED,            sensorLEDtoVCC)
 #pragma config(Sensor, dgtl3,  quadLift,       sensorQuadEncoder)
@@ -59,10 +61,10 @@ void pre_auton()
   // manage all user created tasks if set to false.
   bStopTasksBetweenModes = true;
 
-	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
-	// used by the competition include file, for example, you might want
-	// to display your team name on the LCD in this function.
-	// bDisplayCompetitionStatusOnLcd = false;
+    // Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
+    // used by the competition include file, for example, you might want
+    // to display your team name on the LCD in this function.
+    // bDisplayCompetitionStatusOnLcd = false;
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
@@ -101,7 +103,7 @@ task autonomous()
 task usercontrol()
 {
   // User control code here, inside the loop
-	begin();
+    begin();
   while (true)
   {
     // This is the main execution loop for the user control program.
