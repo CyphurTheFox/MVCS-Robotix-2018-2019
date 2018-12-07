@@ -53,7 +53,7 @@
 #define memSpeed rmt(R8)
 #define speedInc (rmt(U8) && (rmt(U6) && rmt(D6)))
 #define speedDec (rmt(D8) && (rmt(D6) && rmt(U6)))
-#define speedReset (rmt(U8) && mrt(D8) && (rmt(D6) && rmt(U6)))
+#define speedReset (rmt(U8) && rmt(D8) && (rmt(D6) && rmt(U6)))
 
 //Cascade Lift
 #define cascadeU (rmt(U5) && !rmt(D5))
@@ -61,7 +61,8 @@
 #define clawU (rmt(D5) && rmt(U5) && rmt(U7))
 #define clawD (rmt(D5) && rmt(U5) && rmt(D7))
 #define clawToggle (rmt(R7))
-#define groundFlip (rmt(U7) && !(rmt(D5) && rmt(U5)))
+#define cascadeTop (cascadeU && rmt(U7))
+#define groundFlip (rmt(U7) && !(rmt(D5) && rmt(U5)) && !cascadeTop)
 #define cascadeDown (rmt(D7) && !(rmt(D5) && rmt(U5)))
 
 /*---------------------------------------------------------------------------*/
