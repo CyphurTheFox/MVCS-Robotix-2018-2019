@@ -41,6 +41,11 @@ task autoClaw(){  //handle Claw Movement
     while (true) {
         sens = SensorValue[Claw]/10;    //determine current claw position
         armOff = mabs(sens-armTarget) > 10;
+        if (!armOff){
+            clearTimer(T2);
+        } else if (time1[T2] > 3000){
+            liftTarget = sensLift;
+        }
         motor[mCLW]= 1.5*(armTarget-sens);
         EndTimeSlice(); //tell task handler done
     }
@@ -54,7 +59,12 @@ task autoLift(){ //Task to move Lift into postition
     while (true) {
         sensLift = SensorValue[quadLift];    // determine current lift position
         liftOff = mabs(sensLift-liftTarget) > 1;
-        motor[mLFT]= 2.5*(liftTarget-sensLift);
+        if (!liftOff){
+            clearTimer(T1);
+        } else if (time1[T1] > 10000){
+            liftTarget = sensLift;
+        }
+        motor[mLFT]= 3*(liftTarget-sensLift);
         EndTimeSlice();            //tell task handler done
     }
 }
@@ -82,12 +92,17 @@ task liftClawInterfaceSimple(){
         if(groundFlip){
             while(groundFlip){wait1Msec(1);}
             armTarget = gndFlip;
-            while(armOff){wait1Msec(1);}
+            do{wait1Msec(5);} while(armOff);
             armTarget = Down;
+        }
+        if(cascadeTop){
+            while(cascadeTop){wait1Msec(5);}
+            liftTarget = liftTop;
         }
         EndTimeSlice();
     }
 }
+
 /*
 
 task liftClawControllerInterface(){
