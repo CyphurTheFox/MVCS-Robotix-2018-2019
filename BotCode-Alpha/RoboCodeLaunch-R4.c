@@ -42,15 +42,17 @@
 //----------------------Controller Action Defnintions--------------------
 
 //Drivetrain
-#define flipHead rmt(R8)
+#define flipHead rmt(L7)
 
 //Flywheels
-#define intakeI (rmt(U6) && !rmt(U8))
-#define intakeO (rmt(D6) && !rmt(U8))
-#define toggleFly rmt(D8)
+#define intakeI (rmt(U6) && !rmt(D6))
+#define intakeO (rmt(D6) && !rmt(U6))
+#define toggleFly (rmt(D8) && !(rmt(D6) && rmt(U6)))
+#define onFull (rmt(U8) && !(rmt(U6) && rmt(D6)))
 #define secondarySpeed rmt(L8)
-#define speedInc (rmt(U8) && (rmt(U6) && !rmt(D6)))
-#define speedDec (rmt(U8) && (rmt(D6) && !rmt(U6)))
+#define memSpeed rmt(R8)
+#define speedInc (rmt(U8) && (rmt(U6) && rmt(D6)))
+#define speedDec (rmt(D8) && (rmt(D6) && rmt(U6)))
 #define speedReset (rmt(U8) && (rmt(D6) && rmt(U6)))
 
 //Cascade Lift
@@ -58,9 +60,9 @@
 #define cascadeD (rmt(D5) && !rmt(U5))
 #define clawU (rmt(D5) && rmt(U5) && rmt(U7))
 #define clawD (rmt(D5) && rmt(U5) && rmt(D7))
-#define clawToggle (rmt(D7) && !(rmt(D5) && rmt(U5)))
+#define clawToggle (rmt(R7))
 #define groundFlip (rmt(U7) && !(rmt(D5) && rmt(U5)))
-#define cascadeDown (rmt(L7))
+#define cascadeDown (rmt(D7) && !(rmt(D5) && rmt(U5)))
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */

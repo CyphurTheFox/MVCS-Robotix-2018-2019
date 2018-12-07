@@ -52,14 +52,14 @@ task LEDControl(){      //task to turn LED on & off
 task flywheelToggle() { //detects button presses to toggle the flywheel
     while (true) {
         if (toggleFly) { //if toggle button pressed
-            flywheelRunning = !flywheelRunning;  //set flywheel running bool to the opposite value
+            flywheelRunning = false;  //set flywheel running bool to the opposite value
             while (toggleFly) { //wait until button un-pressed
                 wait1Msec(1);
             }
         }
         if (flywheelRunning) { // if flywheel set to be on
-            motor[mFRE] = flySpeed + (5*flyModifier); //turn on
-            motor[mFRE2] = flySpeed + (5*flyModifier);
+            motor[mFRE] = flySpeed; //turn on
+            motor[mFRE2] = flySpeed;
             } else {
             motor[mFRE] = 0; //else turn off
             motor[mFRE2] = 0;
@@ -76,23 +76,35 @@ task flySpeedAdjuster() {       //Adjust the flywheel Speeds
             while(secondarySpeed){        //wait until not pressed
                 wait1Msec(1);
             }
-            switch(flySpeed){
-            case 500:                   //if flySpeed = 500
-                flySpeed = speed1;         //set flySpeed to lv1
-                break;
-            default:                    //else
-                flySpeed = 500;         //set flyspeed to 500
+            flySpeed = speed1;
+            flywheelRunning = true;
+        }
+        if (onFull) {             //if 8U pressed
+            while(secondarySpeed){        //wait until not pressed
+                wait1Msec(1);
             }
+            flySpeed = 2000;
+            flywheelRunning = true;
+        }
+        if (memSpeed) {             //if 8U pressed
+            while(secondarySpeed){        //wait until not pressed
+                wait1Msec(1);
+            }
+            flySpeed = speed + (5*flyModifier);
+            flywheelRunning = true;
         }
         if (speedReset) {                      //if speed reset buttons
             while(speedReset){wait1Msec(1);}
             flyModifier = 0;                                    //reset modifier
+            flySpeed = speed1 + (5*flyModifier);
         }else if (speedInc) {                               //if speed increment buttons
             while(speedInc){wait1Msec(1);}
             flyModifier++;                                      //increase modifier
+            flySpeed = speed1 + (5*flyModifier);
         }else if (speedDec) {                               //if speed decrement buttons
             while(speedDec){wait1Msec(1);}
             flyModifier--;                                      //decrease modifier
+            flySpeed = speed1 + (5*flyModifier);
         }
     }
 }
