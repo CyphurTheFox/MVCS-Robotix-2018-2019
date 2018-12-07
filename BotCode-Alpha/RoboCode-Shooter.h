@@ -90,7 +90,7 @@ task flySpeedAdjuster() {       //Adjust the flywheel Speeds
             while(secondarySpeed){        //wait until not pressed
                 wait1Msec(1);
             }
-            flySpeed = speed + (5*flyModifier);
+            flySpeed = speed1 + (5*flyModifier);
             flywheelRunning = true;
         }
         if (speedReset) {                      //if speed reset buttons

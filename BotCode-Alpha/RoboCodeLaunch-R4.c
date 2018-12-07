@@ -23,7 +23,7 @@
 
 //Potentiometer Positions for Cascade Lift Arm. Multiply Values by 10
 #define Lifted 235
-#define gndFlip 150
+#define gndFlip 200
 #define Down  60
 
 //Encoder Values for Lift Hieghts. Multiply Values by 10

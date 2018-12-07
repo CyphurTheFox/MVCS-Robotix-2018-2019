@@ -82,12 +82,13 @@ task liftClawInterfaceSimple(){
         if(groundFlip){
             while(groundFlip){wait1Msec(1);}
             armTarget = gndFlip;
-            while(armOff){wait1Msec(1);}
+            do{wait1Msec(5);} while(armOff);
             armTarget = Down;
         }
         EndTimeSlice();
     }
 }
+
 /*
 
 task liftClawControllerInterface(){
