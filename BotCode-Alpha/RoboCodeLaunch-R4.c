@@ -53,7 +53,7 @@
 #define memSpeed rmt(R8)
 #define speedInc (rmt(U8) && (rmt(U6) && rmt(D6)))
 #define speedDec (rmt(D8) && (rmt(D6) && rmt(U6)))
-#define speedReset (rmt(U8) && (rmt(D6) && rmt(U6)))
+#define speedReset (rmt(U8) && mrt(D8) && (rmt(D6) && rmt(U6)))
 
 //Cascade Lift
 #define cascadeU (rmt(U5) && !rmt(D5))
