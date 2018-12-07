@@ -22,13 +22,14 @@
 #define flywheelSensorThreshhold 300
 
 //Potentiometer Positions for Cascade Lift Arm. Multiply Values by 10
-#define Lifted 200
+#define Lifted 235
+#define gndFlip 150
 #define Down  60
 
 //Encoder Values for Lift Hieghts. Multiply Values by 10
 #define liftBottom 0
 #define liftMiddle 130
-#define liftTop 1900
+#define liftTop 2200
 #define removeMod 50
 
 

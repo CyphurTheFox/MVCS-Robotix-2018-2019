@@ -11,7 +11,6 @@ int sign(int input) {
 	return input < 0 ? -1 : 1;
 }
 struct driveMotor FR;
-
 struct driveMotor BR;
 struct driveMotor BL;
 struct driveMotor FL;

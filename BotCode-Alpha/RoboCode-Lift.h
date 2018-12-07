@@ -81,7 +81,7 @@ task liftClawInterfaceSimple(){
         }
         if(groundFlip){
             while(groundFlip){wait1Msec(1);}
-            armTarget = 2*(Lifted/3);
+            armTarget = gndFlip;
             while(armOff){wait1Msec(1);}
             armTarget = Down;
         }
