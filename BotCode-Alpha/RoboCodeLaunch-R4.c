@@ -1,9 +1,9 @@
 #pragma config(Sensor, in2,    Claw,           sensorPotentiometer)
-#pragma config(Sensor, in3,    AutonSelect     sensorPotentiometer)
+#pragma config(Sensor, in3,    AutonSelect,    sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  LED,            sensorLEDtoVCC)
+#pragma config(Sensor, dgtl2,  limitLiftBottom, sensorTouch)
+#pragma config(Sensor, dgtl3,  limitLiftTop,   sensorTouch)
 #pragma config(Sensor, dgtl4,  configLED,      sensorLEDtoVCC)
-#pragma config(Sensor, dgtl3,  limitLiftTop,        sensorTouch)
-#pragma config(Sensor, dgtl2,  limitLiftBottom,     sensorTouch)
 #pragma config(Sensor, dgtl5,  encBL,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  encBR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl9,  encFL,          sensorQuadEncoder)
@@ -144,7 +144,7 @@ task autonomous()
      (flySpeed) integer variable indicating flywheel motor speed.
      (intake) Boolean variable toggling intake on/off
      */
-    switch(floor(sensorValue[AutonSelect]/1366){
+    switch(floor(sensorValue[AutonSelect]/1366)){
         case 0:
             //auton side red
         break;
@@ -152,9 +152,9 @@ task autonomous()
             //auton side blue
         break;
     }
-     
-     
-    
+
+
+
 }
 
 /*---------------------------------------------------------------------------*/
