@@ -1,7 +1,8 @@
 #pragma config(Sensor, in2,    Claw,           sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  LED,            sensorLEDtoVCC)
 #pragma config(Sensor, dgtl4,  configLED,      sensorLEDtoVCC)
-#pragma config(Sensor, dgtl2,  quadLift,       sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  liftTop,        sensorTouch)
+#pragma config(Sensor, dgtl2,  liftBottom,     sensorTouch)
 #pragma config(Sensor, dgtl5,  encBL,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  encBR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl9,  encFL,          sensorQuadEncoder)
@@ -22,15 +23,10 @@
 #define flywheelSensorThreshhold 300
 
 //Potentiometer Positions for Cascade Lift Arm. Multiply Values by 10
-#define Lifted 235
+#define Lifted 300
 #define gndFlip 200
 #define Down  60
 
-//Encoder Values for Lift Hieghts. Multiply Values by 10
-#define liftBottom 0
-#define liftMiddle 130
-#define liftTop 2200
-#define removeMod 50
 
 
 //Auton Constants
@@ -49,7 +45,7 @@
 #define intakeO (rmt(D6) && !rmt(U6))
 #define toggleFly (rmt(D8) && !(rmt(D6) && rmt(U6)))
 #define onFull (rmt(U8) && !(rmt(U6) && rmt(D6)))
-#define secondarySpeed rmt(L8)
+#define secondarySpeed (rmt(L8))
 #define memSpeed rmt(R8)
 #define speedInc (rmt(U8) && (rmt(U6) && rmt(D6)))
 #define speedDec (rmt(D8) && (rmt(D6) && rmt(U6)))
@@ -63,7 +59,7 @@
 #define clawToggle (rmt(R7))
 #define cascadeTop (cascadeU && rmt(U7))
 #define groundFlip (rmt(U7) && !(rmt(D5) && rmt(U5)) && !cascadeTop)
-#define cascadeDown (rmt(D7) && !(rmt(D5) && rmt(U5)))
+#define cascadeBottom (rmt(D7) && !(rmt(D5) && rmt(U5)))
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */

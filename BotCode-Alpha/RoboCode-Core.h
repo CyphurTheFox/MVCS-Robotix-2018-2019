@@ -104,7 +104,6 @@ void applyMotorSpeed(int FRi, int BRi, int BLi, int FLi){
     float ratios [4][2];
     int *lo;
     int *loSens;
-
     motor[FR] = FRi;
     motor[BR] = BRi;
     motor[BL] = BLi;

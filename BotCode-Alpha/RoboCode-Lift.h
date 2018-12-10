@@ -10,14 +10,14 @@
 task cascadeClawManual(){  //control cascade lift and claw manually
 	while(true){
 		if(cascadeU){
-            liftTarget = liftTop;
+            liftToTop = false;
+            liftToBottom = false;
             while (cascadeU) {wait1Msec(10);}
-            liftTarget = SensorValue[quadLift];
 		}
         if(cascadeD){
-            liftTarget = liftBottom;
+            liftToTop = false;
+            liftToBottom = false;
             while (cascadeD) {wait1Msec(10);}
-            liftTarget = SensorValue[quadLift];
         }
         if(clawU){
             armTarget = Lifted;
@@ -44,7 +44,7 @@ task autoClaw(){  //handle Claw Movement
         if (!armOff){
             clearTimer(T2);
         } else if (time1[T2] > 3000){
-            liftTarget = sensLift;
+            armTarget = sens;
         }
         motor[mCLW]= 1.5*(armTarget-sens);
         EndTimeSlice(); //tell task handler done
@@ -52,20 +52,49 @@ task autoClaw(){  //handle Claw Movement
 }
 
 
+/*
+ The function works in four steps, then passes the identifier, herin known as "var" to the switch statement.
+ 
+ 1: if the lift is in top position, then set var to 6, else set it to three;
+ 2: if lift is in bottom position, then set var to 0 (subtract 3), else do nothing.
+ effect: if lift is at top, var will be 6, if bottom: 0, if middle: 3
+ 
+ 3: if lift is set to go to top position or upwards, then add one to var
+ 4: if lift is set to go down, subtract one from var
+ 
+ effect:    if lift is not set to move, var will be 0, 3, or 6
+            if lift is set to move upwards and can, var will be 1 or 4
+            if lift is set to move down and can, var will be 2 or 5
+            if lift is being told to go to both up and down at the same time, it will do neither. (var = 0, 3, or 6)
+switch statement will then act on this math.
+*/
+
+bool liftToTop = false;
+bool liftToBottom = true;
 task autoLift(){ //Task to move Lift into postition
-    int sensLift;
-    SensorValue[quadLift] = 0;                  //initialize the quad encoder to 0;
-    liftTarget = SensorValue[quadLift];      //set target to current position to prevent unwanted movement
     while (true) {
-        sensLift = SensorValue[quadLift];    // determine current lift position
-        liftOff = mabs(sensLift-liftTarget) > 1;
-        if (!liftOff){
-            clearTimer(T1);
-        } else if (time1[T1] > 10000){
-            liftTarget = sensLift;
+        switch (
+        /*1:*/  (liftTop ? 6 : 3)+
+        /*2:*/  (liftBottom ? -3 : 0)+
+        /*3:*/  (cascadeU || liftToTop ? 1 : 0)+
+        /*4:*/  (liftToBottom || cascadeD ? -1 : 0)
+                )
+        {  //see above for how this math works
+            case 1:
+            case 4:
+                motor[mLFT] = 127;
+                break;
+            case 2:
+            case 5:
+                motor[mLFT] = -127;
+                break;
+            default:
+                motor[mLFT] = 0;
+                clearTimer(T1);
+                break;
         }
-        motor[mLFT]= 3*(liftTarget-sensLift);
-        EndTimeSlice();            //tell task handler done
+        if(time1[T1] > 10500 && (liftToTop || LiftToBottom)) //Motor overextention catch
+            liftToTop = liftToBottom = false;
     }
 }
 
@@ -86,18 +115,21 @@ task liftClawInterfaceSimple(){
                     break;
             }
         }
-        if(cascadeDown){
-            liftTarget = liftBottom;
+        if(cascadeBottom){
+            while(cascadeBottom || cascadeD){wait1Msec(10);}
+            liftToBottom = true;
+            liftToTop = false;
         }
         if(groundFlip){
-            while(groundFlip){wait1Msec(1);}
+            while(groundFlip){wait1Msec(10);}
             armTarget = gndFlip;
             do{wait1Msec(5);} while(armOff);
             armTarget = Down;
         }
         if(cascadeTop){
-            while(cascadeTop){wait1Msec(5);}
-            liftTarget = liftTop;
+            while(cascadeTop || cascadeU){wait1Msec(10);}
+            liftToBottom = false;
+            liftToTop = true;
         }
         EndTimeSlice();
     }
