@@ -74,8 +74,8 @@ bool liftToBottom = true;
 task autoLift(){ //Task to move Lift into postition
     while (true) {
         switch (
-        /*1:*/  (liftTop ? 6 : 3)+
-        /*2:*/  (liftBottom ? -3 : 0)+
+        /*1:*/  (limitLiftTop ? 6 : 3)+
+        /*2:*/  (limitLiftBottom ? -3 : 0)+
         /*3:*/  (cascadeU || liftToTop ? 1 : 0)+
         /*4:*/  (liftToBottom || cascadeD ? -1 : 0)
                 )
