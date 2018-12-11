@@ -148,17 +148,15 @@ void auton () {
 	motor[mIntake] = 127;
 	wait1Msec(2500);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-	turn(-127, 580);
-	motor[mFL] = motor[mBL] = -127;
-	motor[mFR] = motor[mBR] = 127;
-	wait1Msec(350);
-	motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
-	//goFoward (12, 200);
-	moveClawDown (550);
-	motor[mLift] = -90;
-	goFoward (6, 140);
-	motor[mLift] = 0;
-	moveClawUp (3700);
+	goFoward (12, 65);
+	turn(127, 413);
+	motor[mIntake] = -127;
+	goFoward (12, 500);
+	motor[mIntake] = 0;
+	goFoward (3, 440);
+	goFoward (12, 350);
+	goFoward (3, 50);
+	goFoward (12, 80);
 }
 
 task autonomous() {

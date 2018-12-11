@@ -103,11 +103,11 @@ void turn (int power, int distance) {
 	motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
 }
 
-void auton () {
+void auton1 () {
 	goFoward (12, 950);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
 	goFoward (6, 500);
-	goFoward (9, 90);
+	goFoward (9, 95);
 	motor[mIntake] = 127;
 	wait1Msec(2500);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
@@ -122,6 +122,25 @@ void auton () {
 	goFoward (6, 140);
 	motor[mLift] = 0;
 	moveClawUp (3700);
+}
+
+void auton () {
+	goFoward (12, 950);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+	goFoward (6, 500);
+	goFoward (9, 90);
+	motor[mIntake] = 127;
+	wait1Msec(2500);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
+	goFoward (12, 65);
+	turn(127, 413);
+	motor[mIntake] = -127;
+	goFoward (12, 500);
+	motor[mIntake] = 0;
+	goFoward (3, 440);
+	goFoward (12, 350);
+	goFoward (3, 50);
+	goFoward (12, 80);
 }
 
 
