@@ -4,10 +4,10 @@
 #pragma config(Sensor, dgtl2,  limitLiftBottom, sensorTouch)
 #pragma config(Sensor, dgtl3,  limitLiftTop,   sensorTouch)
 #pragma config(Sensor, dgtl4,  configLED,      sensorLEDtoVCC)
-#pragma config(Sensor, dgtl5,  encBL,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  encFR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  encBR,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl9,  encFL,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl11, encFR,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl9,  encBL,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
 #pragma config(Motor,  port1,           mNOT,          tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port3,           mLFT,          tmotorVex393_MC29, openLoop, reversed)
@@ -181,6 +181,7 @@ task usercontrol()
 
 
     /*------------------------------------------*/
-    turnLEDOff(configLED);
-  Start();
+   turnLEDOff(configLED);
+ Start();
+
 }
