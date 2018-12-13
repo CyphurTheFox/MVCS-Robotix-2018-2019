@@ -144,11 +144,11 @@ task autonomous()
      (flySpeed) integer variable indicating flywheel motor speed.
      (intake) Boolean variable toggling intake on/off
      */
-    switch(floor(sensorValue[AutonSelect]/1366){
+    switch(3-(floor(sensorValue[AutonSelect]/683)){
         case 0:
             //auton side red
         break;
-        case 3:
+        case 2:
             //auton side blue
         break;
     }
