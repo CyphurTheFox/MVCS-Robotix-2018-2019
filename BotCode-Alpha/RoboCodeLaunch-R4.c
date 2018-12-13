@@ -1,13 +1,13 @@
 #pragma config(Sensor, in2,    Claw,           sensorPotentiometer)
-#pragma config(Sensor, in3,    AutonSelect     sensorPotentiometer)
+#pragma config(Sensor, in3,    AutonSelect,    sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  LED,            sensorLEDtoVCC)
+#pragma config(Sensor, dgtl2,  limitLiftBottom, sensorTouch)
+#pragma config(Sensor, dgtl3,  limitLiftTop,   sensorTouch)
 #pragma config(Sensor, dgtl4,  configLED,      sensorLEDtoVCC)
-#pragma config(Sensor, dgtl3,  limitLiftTop,        sensorTouch)
-#pragma config(Sensor, dgtl2,  limitLiftBottom,     sensorTouch)
-#pragma config(Sensor, dgtl5,  encBL,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  encFR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  encBR,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl9,  encFL,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl11, encFR,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl9,  encBL,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
 #pragma config(Motor,  port1,           mNOT,          tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port3,           mLFT,          tmotorVex393_MC29, openLoop, reversed)
@@ -93,8 +93,8 @@
 /*  not every time that the robot is disabled.                               */
 /*---------------------------------------------------------------------------*/
 void initMotor(driveMotor that, tMotor mot, tSensors senso){
-	that.motorm = mot;
-	that.encoder = senso;
+    that.motorm = mot;
+    that.encoder = senso;
     SensorValue[senso] = 0;
     that.speed = 0;
     that.target = 0;
@@ -102,19 +102,19 @@ void initMotor(driveMotor that, tMotor mot, tSensors senso){
 }
 void pre_auton()
 {
-	initMotor(FL, mFL, encFL);
-	initMotor(BL, mBL, encBL);
-	initMotor(BR, mBR, encBR);
-	initMotor(FR, mFR, encFR);
+    initMotor(FL, mFL, encFL);
+    initMotor(BL, mBL, encBL);
+    initMotor(BR, mBR, encBR);
+    initMotor(FR, mFR, encFR);
   // Set bStopTasksBetweenModes to false if you want to keep user created tasks
   // running between Autonomous and Driver controlled modes. You will need to
   // manage all user created tasks if set to false.
   bStopTasksBetweenModes = true;
 
-	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
-	// used by the competition include file, for example, you might want
-	// to display your team name on the LCD in this function.
-	// bDisplayCompetitionStatusOnLcd = false;
+    // Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
+    // used by the competition include file, for example, you might want
+    // to display your team name on the LCD in this function.
+    // bDisplayCompetitionStatusOnLcd = false;
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
@@ -152,9 +152,9 @@ task autonomous()
             //auton side blue
         break;
     }
-     
-     
-    
+
+
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -169,7 +169,7 @@ task autonomous()
 
 task usercontrol()
 {
-	wait1Msec(500);
+    wait1Msec(500);
     turnLEDOn(configLED);
     wait1Msec(1500);
 
@@ -181,6 +181,7 @@ task usercontrol()
 
 
     /*------------------------------------------*/
-    turnLEDOff(configLED);
-  Start();
+   turnLEDOff(configLED);
+ Start();
+
 }

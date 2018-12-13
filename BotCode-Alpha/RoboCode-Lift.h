@@ -6,14 +6,15 @@
 /*-------------------------IMPORTANT-----------------------------*/
 
 
-
+bool liftToTop = false;
+bool liftToBottom = true;
 task cascadeClawManual(){  //control cascade lift and claw manually
-	while(true){
-		if(cascadeU){
+    while(true){
+        if(cascadeU){
             liftToTop = false;
             liftToBottom = false;
             while (cascadeU) {wait1Msec(10);}
-		}
+        }
         if(cascadeD){
             liftToTop = false;
             liftToBottom = false;
@@ -29,8 +30,8 @@ task cascadeClawManual(){  //control cascade lift and claw manually
             while (clawD) {wait1Msec(10);}
             armTarget = SensorValue[Claw]/10;
         }
-		EndTimeSlice();
-	}
+        EndTimeSlice();
+    }
 }
 
 
@@ -54,14 +55,14 @@ task autoClaw(){  //handle Claw Movement
 
 /*
  The function works in four steps, then passes the identifier, herin known as "var" to the switch statement.
- 
+
  1: if the lift is in top position, then set var to 6, else set it to three;
  2: if lift is in bottom position, then set var to 0 (subtract 3), else do nothing.
  effect: if lift is at top, var will be 6, if bottom: 0, if middle: 3
- 
+
  3: if lift is set to go to top position or upwards, then add one to var
  4: if lift is set to go down, subtract one from var
- 
+
  effect:    if lift is not set to move, var will be 0, 3, or 6
             if lift is set to move upwards and can, var will be 1 or 4
             if lift is set to move down and can, var will be 2 or 5
@@ -69,13 +70,12 @@ task autoClaw(){  //handle Claw Movement
 switch statement will then act on this math.
 */
 
-bool liftToTop = false;
-bool liftToBottom = true;
+
 task autoLift(){ //Task to move Lift into postition
     while (true) {
         switch (
-        /*1:*/  (limitLiftTop ? 6 : 3)+
-        /*2:*/  (limitLiftBottom ? -3 : 0)+
+        /*1:*/  (SensorValue[limitLiftTop] == 1 ? 6 : 3)+
+        /*2:*/  (SensorValue[limitLiftBottom] == 1 ? -3 : 0)+
         /*3:*/  (cascadeU || liftToTop ? 1 : 0)+
         /*4:*/  (liftToBottom || cascadeD ? -1 : 0)
                 )
@@ -110,8 +110,6 @@ task liftClawInterfaceSimple(){
 
                 default:                            //else
                     armTarget = Down;               //set target to down position
-                    wait1Msec(500);
-                    liftTarget = liftBottom;
                     break;
             }
         }
