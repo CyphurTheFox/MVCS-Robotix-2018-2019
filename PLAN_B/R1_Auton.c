@@ -73,10 +73,14 @@ void getEncoderValues (int direction) {
 	encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
-const int encLeftRatio = 60, encRightRatio = 49;
+const int encLeftRatio = 60, encRightRatio = 52;
 
-bool encLeftGoesFurther () {
-	return encLeft * encLeftRatio > encRight * encRightRatio;
+bool encLeftGoesFurther (int direction) {
+	if (direction == 12) {
+		return encLeft * encLeftRatio > encRight * encRightRatio;
+	} else {
+		return encLeft > encRight;
+	}
 }
 
 void goFoward (int direction, int distance) {
@@ -86,9 +90,9 @@ void goFoward (int direction, int distance) {
 	resetEncoderValues();
 	while ((encLeft + encRight) / 2 < distance) {
 		getEncoderValues(direction);
-		if (abs(encLeft * encLeftRatio - encRight * encRightRatio) > 30) {
-			motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeftGoesFurther() ? 95 : 127;
-			motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeftGoesFurther() ? 127 : 95;
+		if (direction == 12 ? abs(encLeft * encLeftRatio - encRight * encRightRatio) : abs(encLeft - encRight) > 30) {
+			motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeftGoesFurther(direction) ? 95 : 127;
+			motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeftGoesFurther(direction) ? 127 : 95;
 		} else {
 			motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
 		}
@@ -142,14 +146,14 @@ void autonLeft () {
 	wait1Msec(2500);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
 	goFoward (12, 65);
-	turn(127, 1200);
+	turn(127, 1280);
 	motor[mIntake] = -127;
 	goFoward (12, 500);
 	motor[mIntake] = 0;
 	goFoward (3, 440);
-	goFoward (12, 350);
+	goFoward (12, 310);
 	goFoward (3, 50);
-	goFoward (12, 80);
+	goFoward (12, 40);
 }
 
 void autonRight () {
