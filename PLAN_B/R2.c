@@ -158,7 +158,7 @@ void moveClawDown (int toPos) {
 	motor[mClaw] = 0;
 	clawInAction = false;
 }
-/*
+
 int curClawPos;
 
 void initClawMovement (int toPos) {
@@ -176,6 +176,7 @@ void initClawMovement (int toPos) {
 	}
 }
 
+
 void flipOnBot () {
 	clawInAction = true;
 	while (true) {
@@ -183,7 +184,7 @@ void flipOnBot () {
 				 vexRT[Btn7U] || vexRT[Btn7R]) {
 			break;
 		}
-		initClawMovement (1950);
+		initClawMovement (1800);
 	}
 	clawInAction = false;
 }
@@ -202,7 +203,7 @@ task clawAssist () {
 		EndTimeSlice ();
 	}
 }
-*/
+
 task claw () {
 	while (true) {
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
@@ -217,7 +218,6 @@ task claw () {
 				motor[mClaw] = 0;
 			}
 		} else {
-		/*
 			if (vexRT[Btn7R]) {
 				moveClawDown (600);
 			}
@@ -227,11 +227,10 @@ task claw () {
 			}
 			if (vexRT[Btn7D]) { // flip on bot
 				//moveClawUp (2000); // change this number to change the target pot position
-				moveClawUp (2150);
+				moveClawUp (2050);
 				motor[mClaw] = 0;
 				flipOnBot();
 			}
-			*/
 		}
 		EndTimeSlice();
 	}
@@ -297,7 +296,7 @@ task usercontrol() {
 	startTask(flyWheel);
 	startTask(lifter);
 	startTask(claw);
-	//startTask(clawAssist);
+	startTask(clawAssist);
 	startTask(LED_Update);
   while (true) {
     EndTimeSlice();
