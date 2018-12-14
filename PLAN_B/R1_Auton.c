@@ -146,14 +146,14 @@ void autonLeft () {
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
     goFoward (12, 65);
-    turn(127, 1330);
+    turn(127, 1280);
     motor[mIntake] = -127;
-    goFoward (12, 500);
+    goFoward (12, 490);
     motor[mIntake] = 0;
     goFoward (3, 440);
-    goFoward (12, 310);
+    goFoward (12, 260);
     goFoward (3, 50);
-    goFoward (12, 40);
+    goFoward (12, 50);
 }
 
 void autonRight () {
@@ -178,9 +178,9 @@ void autonRight () {
 void auton() {
     //turn(127, 1200);
     //return;
-    if (SensorValue[potAuton] < 280) {
+    if (SensorValue[potAuton] < 1500) {
         autonLeft();
-    } else if (SensorValue[potAuton] > 560) {
+    } else if (SensorValue[potAuton] > 2700) {
         autonRight();
     }
 }
