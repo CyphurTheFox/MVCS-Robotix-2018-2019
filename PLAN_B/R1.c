@@ -106,7 +106,7 @@ void getEncoderValues (int direction) {
     encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
-const int encLeftRatio = 60, encRightRatio = 52;
+const int encLeftRatio = 60, encRightRatio = 57;
 
 bool encLeftGoesFurther (int direction) {
     if (direction == 12) {
@@ -149,29 +149,8 @@ void turn (int power, int distance) {
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
 }
 
-void auton1 () {
-    goFoward (12, 950);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goFoward (6, 500);
-    goFoward (9, 95);
-    motor[mIntake] = 127;
-    wait1Msec(2500);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    turn(-127, 580);
-    motor[mFL] = motor[mBL] = -127;
-    motor[mFR] = motor[mBR] = 127;
-    wait1Msec(350);
-    motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
-    //goFoward (12, 200);
-    moveClawDown (550);
-    motor[mLift] = -90;
-    goFoward (6, 140);
-    motor[mLift] = 0;
-    moveClawUp (3700);
-}
-
 void autonLeft () {
-    goFoward (12, 900);
+    goFoward (12, 950);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
     goFoward (6, 500);
     goFoward (9, 90);
@@ -179,35 +158,36 @@ void autonLeft () {
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
     goFoward (12, 65);
-    turn(127, 1280);
+    turn(127, 1300);
     motor[mIntake] = -127;
-    goFoward (12, 490);
+    goFoward (12, 400);
     motor[mIntake] = 0;
+    goFoward (12, 100);
     goFoward (3, 440);
-    goFoward (12, 260);
+    goFoward (12, 300);
     goFoward (3, 50);
     goFoward (12, 50);
 }
 
 void autonRight () {
-    goFoward (12, 930);
+    goFoward (12, 950);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goFoward (6, 530);
-    goFoward (3, 80);
+    goFoward (6, 500);
+    goFoward (3, 70);
     motor[mIntake] = 127;
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
     goFoward (12, 65);
-    turn(-127, 1310);
+    turn(-127, 1320);
     motor[mIntake] = -127;
-    goFoward (12, 410);
+    goFoward (12, 400);
     motor[mIntake] = 0;
-    goFoward (9, 410);
-    goFoward (12, 300);
-    goFoward (9, 80);
-    goFoward (12, 80);
+    goFoward (12, 100);
+    goFoward (9, 460);
+    goFoward (12, 270);
+    goFoward (9, 40);
+    goFoward (12, 60);
 }
-
 void auton() {
     //turn(127, 1200);
     //return;
