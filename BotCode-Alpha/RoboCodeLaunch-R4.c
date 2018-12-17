@@ -120,6 +120,28 @@ void pre_auton()
   // Example: clearing encoders, setting servo positions, ...
 }
 
+// Auton Left(Blue) Side Constants
+#define leftLowFlagHit 2.5
+#define leftAimingY -500/360
+#define leftAimingX -.25
+#define ShootingDelay 2500
+#define leftCapAlign 65/360
+#define rightTurn 1280/360
+#define leftCapFlip 500
+#define leftHitMidFlag -440
+#define leftDiagonalHitFlag 60
+
+//Auton Right(Red) Side Constants
+#define rightLowFlagHit 2.5
+#define rightAimingY -500/360
+#define rightAimingX .25
+#define rightCapAlign 65/360
+#define leftTurn -1280/360
+#define rightCapFlip 500
+#define rightHitMidFlag 440
+#define rightDiagonalHitFlag 60
+
+
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
 /*                              Autonomous Task                              */
@@ -143,13 +165,42 @@ task autonomous()
      (flywheelRunning) Boolean variable indicating wether or not flywheel is on
      (flySpeed) integer variable indicating flywheel motor speed.
      (intake) Boolean variable toggling intake on/off
+     (intakeReverse) Boolean toggling reversed intake
+     
+     
+     IMPORTANT regarding translate: translate functions accurately only in
+     45 degree increments. intermediate angles do not work
      */
     switch(3-(floor(sensorValue[AutonSelect]/683)){
         case 0:
-            //auton side red
+        translate(0,rightLowFlagHit);
+        flywheelRunning = true;
+        translate(0, rightAimingY);
+        translate(rightAimingX, 0);
+        intake = true;
+        wait1Msec(ShootingDelay);
+        intake = false;
+        translate(0,rightCapAlign);
+        rotate(leftTurn);
+        reverseIntake = true;
+        translate(0,rightCapFlip);
+        translate(rightHitMidFlag, 0);
+        translate(rightDiagonalHitFlag,rightDiagonalHitFlag);
         break;
         case 2:
-            //auton side blue
+        translate(0,leftLowFlagHit);
+        flywheelRunning = true;
+        translate(0, leftAimingY);
+        translate(leftAimingX, 0);
+        intake = true;
+        wait1Msec(ShootingDelay);
+        intake = false;
+        translate(0,leftCapAlign);
+        rotate(rightTurn);
+        reverseIntake = true;
+        translate(0,leftCapFlip);
+        translate(leftHitMidFlag, 0);
+        translate(-leftDiagonalHitFlag,leftDiagonalHitFlag);
         break;
     }
 

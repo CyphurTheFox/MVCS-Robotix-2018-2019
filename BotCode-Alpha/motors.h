@@ -18,7 +18,7 @@ struct driveMotor FL;
 void calc(driveMotor the){
     the.speed = 5*(the.target-SensorValue[the.encoder]);
     the.speed = abs(the.speed) > the.topspeed ? the.topspeed*sign(the.speed) : the.speed;
-    if (abs(the.speed) < 50){
+    if (abs(the.speed) < 30){
         the.speed = 0;
         the.inPos = true;
     } else {
@@ -47,7 +47,7 @@ task moveMotors(){
     moved = true;
 }
 
-void translate(int x,int y){  //translate robot relative to robot head
+void translate(float x,float y){  //translate robot relative to robot head
     x *= -360;
     y *= -360;
     FR.target += (-y + x);
@@ -58,7 +58,7 @@ void translate(int x,int y){  //translate robot relative to robot head
     while(!moved){wait1Msec(10);}
     return;
 }
-void rotate(int t){
+void rotate(float t){
     t *= -360;
     FR.target += t;
     FL.target += t;

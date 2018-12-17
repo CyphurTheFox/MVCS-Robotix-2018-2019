@@ -57,6 +57,7 @@ bool armOff;
 bool secondary = false;
 bool liftClawControl;
 bool intake = false;
+bool intakeReverse = false;
 //const char assignmentOrder[4] = {'D','L','U','R'};
 
 int rmt(char *a){ //takes advantage of some research on vexRT[]

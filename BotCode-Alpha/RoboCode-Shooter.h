@@ -11,7 +11,7 @@ task ballGrabber(){ //Ball intake system code
     while(true){
         if (intakeI || intake) { //if intake button pressed...
             motor[mGRB] = 127; //run intake motor
-            } else if (intakeO) { //if reverse button Pressed
+            } else if (intakeO || intakeReverse) { //if reverse button Pressed
             motor[mGRB] = -127; // reverse
             } else {
             motor[mGRB] = 0; //else stop
