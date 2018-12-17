@@ -35,6 +35,7 @@ int mabs(int a1) {
 //-----------------------------------------------IMPORTANT---------------------------------------------
 
 #include "controllerDefinitions.h"
+#include "Auton.h"
 #include "motors.h"
 //Config
 #define adjustmentThreshhold 0.04
@@ -166,10 +167,10 @@ task drivetrain(){ //Drivetrain Task. Joshua's code.
             FR.speed = FL.speed = BR.speed = BL.speed = 0;                                                                                                    //if so, sets motor speeds to 0
         }
         if(sqrt((vexRT[Ch4]*vexRT[Ch4]) + (vexRT[Ch3]*vexRT[Ch3])) < 120 && sqrt((vexRT[Ch1]*vexRT[Ch1]) + (vexRT[Ch2]*vexRT[Ch2])) < 120){    //if Joystick not at extremes
-            FR.speed = FR.speed/2;      //halfSpeed
-            FL.speed = FL.speed/2;
-            BR.speed = BR.speed/2;
-            BL.speed = BL.speed/2;
+            FR.speed /= 2;      //halfSpeed
+            FL.speed /= 2;
+            BR.speed /= 2;
+            BL.speed /= 2;
             }
         apply(FR);  //Applies Motor Speeds
         apply(FL);

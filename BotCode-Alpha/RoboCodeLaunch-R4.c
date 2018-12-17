@@ -1,5 +1,5 @@
 #pragma config(Sensor, in2,    Claw,           sensorPotentiometer)
-#pragma config(Sensor, in3,    AutonSelect,    sensorPotentiometer)
+#pragma config(Sensor, in3,    potAuton,    sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  LED,            sensorLEDtoVCC)
 #pragma config(Sensor, dgtl2,  limitLiftBottom, sensorTouch)
 #pragma config(Sensor, dgtl3,  limitLiftTop,   sensorTouch)
@@ -154,52 +154,7 @@ void pre_auton()
 
 task autonomous()
 {
-    //functions for programing auton:
-    /*
-     translate (x,y); Translates the robot relative to the robot's Head.
-     rotate (turns); rotates robot around center.
-     (liftOff)  boolean variable indicating if lift is not in position
-     (armOff) boolean variable indicating if arm is not in position
-     (liftTarget) integer value indicating target position of lift
-     (armTarget) integer value indicating target position of arm
-     (flywheelRunning) Boolean variable indicating wether or not flywheel is on
-     (flySpeed) integer variable indicating flywheel motor speed.
-     (intake) Boolean variable toggling intake on/off
-     (intakeReverse) Boolean toggling reversed intake
-     
-     
-     IMPORTANT regarding translate: translate functions accurately only in
-     45 degree increments. intermediate angles do not work
-     */
-    if (SensorValue[potAuton] < 1500) {
-        translate(0,rightLowFlagHit);
-        flywheelRunning = true;
-        translate(0, rightAimingY);
-        translate(rightAimingX, 0);
-        intake = true;
-        wait1Msec(ShootingDelay);
-        intake = false;
-        translate(0,rightCapAlign);
-        rotate(leftTurn);
-        reverseIntake = true;
-        translate(0,rightCapFlip);
-        translate(rightHitMidFlag, 0);
-        translate(rightDiagonalHitFlag,rightDiagonalHitFlag);
-    } else if (SensorValue[potAuton] > 2700) {
-        translate(0,leftLowFlagHit);
-        flywheelRunning = true;
-        translate(0, leftAimingY);
-        translate(leftAimingX, 0);
-        intake = true;
-        wait1Msec(ShootingDelay);
-        intake = false;
-        translate(0,leftCapAlign);
-        rotate(rightTurn);
-        reverseIntake = true;
-        translate(0,leftCapFlip);
-        translate(leftHitMidFlag, 0);
-        translate(-leftDiagonalHitFlag,leftDiagonalHitFlag);
-    }
+    auton()
 
 }
 
