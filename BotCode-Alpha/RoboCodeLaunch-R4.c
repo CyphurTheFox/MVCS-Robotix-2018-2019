@@ -171,8 +171,7 @@ task autonomous()
      IMPORTANT regarding translate: translate functions accurately only in
      45 degree increments. intermediate angles do not work
      */
-    switch(3-(floor(sensorValue[AutonSelect]/683)){
-        case 0:
+    if (SensorValue[potAuton] < 1500) {
         translate(0,rightLowFlagHit);
         flywheelRunning = true;
         translate(0, rightAimingY);
@@ -186,8 +185,7 @@ task autonomous()
         translate(0,rightCapFlip);
         translate(rightHitMidFlag, 0);
         translate(rightDiagonalHitFlag,rightDiagonalHitFlag);
-        break;
-        case 2:
+    } else if (SensorValue[potAuton] > 2700) {
         translate(0,leftLowFlagHit);
         flywheelRunning = true;
         translate(0, leftAimingY);
@@ -201,10 +199,7 @@ task autonomous()
         translate(0,leftCapFlip);
         translate(leftHitMidFlag, 0);
         translate(-leftDiagonalHitFlag,leftDiagonalHitFlag);
-        break;
     }
-
-
 
 }
 
