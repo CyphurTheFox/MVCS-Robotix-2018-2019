@@ -46,7 +46,26 @@ void pre_auton() {
   bStopTasksBetweenModes = true;
 }
 
+bool clawInAction = false;
 
+void moveClawUp (int toPos) {
+    clawInAction = true;
+    clearTimer(T1); // set timer in order to prevent burning out motors
+    while (SensorValue[potClaw] < toPos && time1[T1] < 3000) {
+        motor[mClaw] = 127;
+    }
+    motor[mClaw] = 0;
+    clawInAction = false;
+}
+void moveClawDown (int toPos) {
+    clawInAction = true;
+    clearTimer(T1); // set timer in order to prevent burning out motors
+    while (SensorValue[potClaw] > toPos && time1[T1] < 3000) {
+        motor[mClaw] = -77;
+    }
+    motor[mClaw] = 0;
+    clawInAction = false;
+}
 /*
 goFoward function doc
     direction can be one of the four: 12, 3, 6, 9
@@ -87,6 +106,16 @@ void getEncoderValues (int direction) {
     encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
+const int encLeftRatio = 60, encRightRatio = 57;
+
+bool encLeftGoesFurther (int direction) {
+    if (direction == 12) {
+        return encLeft * encLeftRatio > encRight * encRightRatio;
+    } else {
+        return encLeft > encRight;
+    }
+}
+
 void goFoward (int direction, int distance) {
     if (mListDirection[0][direction] == 0) {
         return;
@@ -94,9 +123,9 @@ void goFoward (int direction, int distance) {
     resetEncoderValues();
     while ((encLeft + encRight) / 2 < distance) {
         getEncoderValues(direction);
-        if (abs(encLeft - encRight) > 5) {
-            motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeft > encRight ? 100 : 127;
-            motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeft > encRight ? 127 : 100;
+        if (direction == 12 ? abs(encLeft * encLeftRatio - encRight * encRightRatio) : abs(encLeft - encRight) > 30) {
+            motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeftGoesFurther(direction) ? 95 : 127;
+            motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeftGoesFurther(direction) ? 127 : 95;
         } else {
             motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
         }
@@ -111,7 +140,8 @@ void goFoward (int direction, int distance) {
 
 void turn (int power, int distance) {
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
-    while (abs (SensorValue[encBL]) < distance) {
+    resetEncoderValues();
+    while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) + abs (SensorValue[encBL]) + abs (SensorValue[encBR]) < distance) {
         wait1Msec(1);
     }
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = power > 0 ? 35 : -35;
@@ -119,29 +149,7 @@ void turn (int power, int distance) {
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
 }
 
-
-bool clawInAction = false;
-
-void moveClawUp (int toPos) {
-    clawInAction = true;
-    clearTimer(T1); // set timer in order to prevent burning out motors
-    while (SensorValue[potClaw] < toPos && time1[T1] < 3000) {
-        motor[mClaw] = 127;
-    }
-    motor[mClaw] = 0;
-    clawInAction = false;
-}
-void moveClawDown (int toPos) {
-    clawInAction = true;
-    clearTimer(T1); // set timer in order to prevent burning out motors
-    while (SensorValue[potClaw] > toPos && time1[T1] < 3000) {
-        motor[mClaw] = -77;
-    }
-    motor[mClaw] = 0;
-    clawInAction = false;
-}
-
-void auton () {
+void autonLeft () {
     goFoward (12, 950);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
     goFoward (6, 500);
@@ -150,14 +158,44 @@ void auton () {
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
     goFoward (12, 65);
-    turn(127, 413);
+    turn(127, 1300);
     motor[mIntake] = -127;
-    goFoward (12, 500);
+    goFoward (12, 400);
     motor[mIntake] = 0;
+    goFoward (12, 100);
     goFoward (3, 440);
-    goFoward (12, 350);
+    goFoward (12, 300);
     goFoward (3, 50);
-    goFoward (12, 80);
+    goFoward (12, 50);
+}
+
+void autonRight () {
+    goFoward (12, 950);
+    motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+    goFoward (6, 500);
+    goFoward (3, 70);
+    motor[mIntake] = 127;
+    wait1Msec(2500);
+    motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
+    goFoward (12, 65);
+    turn(-127, 1320);
+    motor[mIntake] = -127;
+    goFoward (12, 400);
+    motor[mIntake] = 0;
+    goFoward (12, 100);
+    goFoward (9, 460);
+    goFoward (12, 270);
+    goFoward (9, 40);
+    goFoward (12, 60);
+}
+void auton() {
+    //turn(127, 1200);
+    //return;
+    if (SensorValue[potAuton] < 1500) {
+        autonLeft();
+    } else if (SensorValue[potAuton] > 2700) {
+        autonRight();
+    }
 }
 
 task autonomous() {
