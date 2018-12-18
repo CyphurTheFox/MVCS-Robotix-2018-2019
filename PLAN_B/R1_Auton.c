@@ -65,10 +65,10 @@ void resetEncoderValues () {
     encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = SensorValue[encBL] = SensorValue[encBR] = 0;
 }
 void getEncoderValues (int direction) {
-    encoderValues[0] = -SensorValue[encFL] * encListDrive[direction][0];
-    encoderValues[1] = -SensorValue[encFR] * encListDrive[direction][1];
-    encoderValues[2] =  SensorValue[encBL] * encListDrive[direction][2];
-    encoderValues[3] = -SensorValue[encBR] * encListDrive[direction][3];
+    encoderValues[0] = abs(SensorValue[encFL] * encListDrive[direction][0]);
+    encoderValues[1] = abs(SensorValue[encFR] * encListDrive[direction][1]);
+    encoderValues[2] = abs(SensorValue[encBL] * encListDrive[direction][2]);
+    encoderValues[3] = abs(SensorValue[encBR] * encListDrive[direction][3]);
     encLeft = (encoderValues[mListDrive[direction][0]] + encoderValues[mListDrive[direction][2]]) / 2;
     encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
