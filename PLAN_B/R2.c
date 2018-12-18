@@ -248,10 +248,10 @@ task drive() {
 			if (abs (vch1) < 100 && abs(vch1) > 20) {
 				vch1 = vch1 > 0 ? 60 : -60;
 			}
-			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vch1; //Determines motor speeds. Joshua's Code.
-      FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vch1;
-      BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vch1;
-      BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vch1;
+			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) + vch1; //Determines motor speeds. Joshua's Code.
+      FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) + vch1;
+      BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) + vch1;
+      BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) + vch1;
 
 			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 100 &&
 				 sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 100) {
