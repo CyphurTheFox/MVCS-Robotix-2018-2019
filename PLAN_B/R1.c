@@ -46,7 +46,7 @@ void pre_auton() {
   bStopTasksBetweenModes = true;
 }
 
-bool clawInAction = false;
+bool flippingOnBot = false, clawInAction = false;
 
 void moveClawUp (int toPos) {
     clawInAction = true;
@@ -291,10 +291,11 @@ task lifter () { // task controlling the cascade-lift an the claw
     }
 }
 
-
+int curTargetClawPos;
 int curClawPos;
 
-void initClawMovement (int toPos) {
+void initClawMovement () {
+		int toPos = curTargetClawPos;
     curClawPos = SensorValue[potClaw];
     if (curClawPos < toPos) {
         motor[mClaw] = 127;
@@ -308,62 +309,78 @@ void initClawMovement (int toPos) {
         motor[mClaw] = -10;
     }
 }
-
+/*
 void flipOnBot () {
-    clawInAction = true;
+    flippingOnBot = true;
+    curTargetClawPos = 1950;
     while (true) {
         if ((vexRT[Btn5U] && vexRT[Btn5D]) && (vexRT[Btn7U] || vexRT[Btn7D]) ||
                  vexRT[Btn7U] || vexRT[Btn7R]) {
             break;
         }
-        initClawMovement (1950);
+        if (vexRT[Btn7R]) {
+        	curTargetClawPos = 2900;
+        }
+        initClawMovement ();
+        EndTimeSlice();
     }
-    clawInAction = false;
+    flippingOnBot = false;
 }
-
 bool clawAssistOn = false, clawInManualControl = false;
 task clawAssist () {
     while (true) {
         if (vexRT[Btn7R]) {
             while (vexRT[Btn7R]) { }
             clawAssistOn = !clawAssistOn;
+            curTargetClawPos = 600;
             moveClawDown (600);
         }
         if (clawAssistOn && !clawInAction && !clawInManualControl) {
-            initClawMovement (900);
+        	curTargetClawPos = 900;
+            initClawMovement ();
         }
         EndTimeSlice ();
     }
 }
+*/
+
 
 task claw () {
     while (true) {
         if (vexRT[Btn5U] && vexRT[Btn5D]) {
             if (vexRT[Btn7U]) {
-                clawInManualControl = true;
-                motor[mClaw] = 127;
+            	//while (vexRT[Btn7U]) { wait1Msec (1); }
+            	curTargetClawPos += 250;
+            	moveClawUp (curTargetClawPos - 30);
             } else if (vexRT[Btn7D]) {
-                clawInManualControl = true;
-                motor[mClaw] = -127;
-            } else {
-                clawInManualControl = false;
-                motor[mClaw] = 0;
+            	//while (vexRT[Btn7D]) { wait1Msec (1); }
+            	curTargetClawPos -= 250;
+            	motor[mClaw] = -30;
+            	wait1Msec (100);
+            	motor[mClaw] = 0;
             }
         } else {
-            if (vexRT[Btn7R]) {
+            if (vexRT[Btn7D]) {
                 moveClawDown (600);
+            	curTargetClawPos = 430;
             }
             if (vexRT[Btn7U]) { // flip on ground
                 moveClawUp (1500);
-                moveClawDown (600);
+                moveClawDown (550);
+                curTargetClawPos = 430;
             }
-            if (vexRT[Btn7D]) { // flip on bot
-                //moveClawUp (2000); // change this number to change the target pot position
-                moveClawUp (2150);
-                motor[mClaw] = 0;
-                flipOnBot();
+            if (vexRT[Btn7R]) { // flip on bot
+            	if (curClawPos > 1850 && curClawPos < 2250) {
+            		moveClawUp(2400);
+	    			curTargetClawPos = 2650;
+            	} else {
+	                moveClawUp (2150);
+	                motor[mClaw] = 0;
+	    			curTargetClawPos = 1950;
+	    		}
             }
         }
+        initClawMovement();
         EndTimeSlice();
     }
 }
@@ -423,14 +440,13 @@ task drive() {
 }
 
 task usercontrol() {
-    startTask(drive);
-    startTask(ballIntake);
-    startTask(flyWheel);
-    startTask(lifter);
-    startTask(claw);
-    startTask(clawAssist);
-    startTask(LED_Update);
-  while (true) {
-    EndTimeSlice();
-  }
+	startTask(drive);
+	startTask(ballIntake);
+	startTask(flyWheel);
+	startTask(lifter);
+	startTask(claw);
+	startTask(LED_Update);
+	while (true) {
+		EndTimeSlice();
+	}
 }
