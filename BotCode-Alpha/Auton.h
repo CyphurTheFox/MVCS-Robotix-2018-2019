@@ -58,8 +58,8 @@ void getEncoderValues (int direction) {
     encoderValues[1] = -SensorValue[encFR] * encListDrive[direction][1];
     encoderValues[2] =  SensorValue[encBL] * encListDrive[direction][2];
     encoderValues[3] = -SensorValue[encBR] * encListDrive[direction][3];
-    encLeft = (encoderValues[mListDrive[direction][0]] + encoderValues[mListDrive[direction][2]]) / 2;
-    encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
+    encLeft = abs(encoderValues[mListDrive[direction][0]] + encoderValues[mListDrive[direction][2]]) / 2;
+    encRight = abs(encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
 const int encLeftRatio = 60, encRightRatio = 57;
@@ -85,7 +85,7 @@ void goFoward (int direction, int distance) {
         } else {
             motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
         }
-        
+
         motor[mFL] = mListDirection[0][direction] * motorPower[0];
         motor[mFR] = mListDirection[1][direction] * motorPower[1];
         motor[mBL] = mListDirection[2][direction] * motorPower[2];
