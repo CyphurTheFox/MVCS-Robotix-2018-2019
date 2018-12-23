@@ -34,7 +34,7 @@ void moveClawDown (int toPos) {
 
 
 /*
-goFoward function doc
+goForward function doc
     direction can be one of the four: 12, 3, 6, 9
         let flyWheel be 12 o'clock
         lift facing 6 o'clock, etc
@@ -83,7 +83,7 @@ bool encLeftGoesFurther (int direction) {
     }
 }
 
-void goFoward (int direction, int distance) {
+void goForward (int direction, int distance) {
     if (mListDirection[0][direction] == 0) {
         return;
     }
@@ -120,7 +120,7 @@ void turn (int power, int distance) {
 
 
 void auton() {
-	goFoward (6, 250);
+	goForward (6, 250);
 }
 
 

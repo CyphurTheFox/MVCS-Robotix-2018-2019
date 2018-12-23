@@ -46,7 +46,7 @@ void pre_auton() {
   bStopTasksBetweenModes = true;
 }
 
-bool clawInAction = false;
+bool flippingOnBot = false, clawInAction = false;
 
 void moveClawUp (int toPos) {
     clawInAction = true;
@@ -67,7 +67,7 @@ void moveClawDown (int toPos) {
     clawInAction = false;
 }
 /*
-goFoward function doc
+goForward function doc
     direction can be one of the four: 12, 3, 6, 9
         let flyWheel be 12 o'clock
         lift facing 6 o'clock, etc
@@ -116,7 +116,7 @@ bool encLeftGoesFurther (int direction) {
     }
 }
 
-void goFoward (int direction, int distance) {
+void goForward (int direction, int distance) {
     if (mListDirection[0][direction] == 0) {
         return;
     }
@@ -150,43 +150,43 @@ void turn (int power, int distance) {
 }
 
 void autonLeft () {
-    goFoward (12, 950);
+    goForward (12, 950);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goFoward (6, 500);
-    goFoward (9, 90);
+    goForward (6, 500);
+    goForward (9, 90);
     motor[mIntake] = 127;
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    goFoward (12, 65);
+    goForward (12, 65);
     turn(127, 1300);
     motor[mIntake] = -127;
-    goFoward (12, 400);
+    goForward (12, 400);
     motor[mIntake] = 0;
-    goFoward (12, 100);
-    goFoward (3, 440);
-    goFoward (12, 300);
-    goFoward (3, 50);
-    goFoward (12, 50);
+    goForward (12, 100);
+    goForward (3, 440);
+    goForward (12, 300);
+    goForward (3, 50);
+    goForward (12, 50);
 }
 
 void autonRight () {
-    goFoward (12, 950);
+    goForward (12, 950);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goFoward (6, 500);
-    goFoward (3, 70);
+    goForward (6, 500);
+    goForward (3, 70);
     motor[mIntake] = 127;
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    goFoward (12, 65);
+    goForward (12, 65);
     turn(-127, 1320);
     motor[mIntake] = -127;
-    goFoward (12, 400);
+    goForward (12, 400);
     motor[mIntake] = 0;
-    goFoward (12, 100);
-    goFoward (9, 460);
-    goFoward (12, 270);
-    goFoward (9, 40);
-    goFoward (12, 60);
+    goForward (12, 100);
+    goForward (9, 460);
+    goForward (12, 270);
+    goForward (9, 40);
+    goForward (12, 60);
 }
 void auton() {
     //turn(127, 1200);
@@ -291,10 +291,11 @@ task lifter () { // task controlling the cascade-lift an the claw
     }
 }
 
-
+int curTargetClawPos;
 int curClawPos;
 
-void initClawMovement (int toPos) {
+void initClawMovement () {
+		int toPos = curTargetClawPos;
     curClawPos = SensorValue[potClaw];
     if (curClawPos < toPos) {
         motor[mClaw] = 127;
@@ -308,62 +309,78 @@ void initClawMovement (int toPos) {
         motor[mClaw] = -10;
     }
 }
-
+/*
 void flipOnBot () {
-    clawInAction = true;
+    flippingOnBot = true;
+    curTargetClawPos = 1950;
     while (true) {
         if ((vexRT[Btn5U] && vexRT[Btn5D]) && (vexRT[Btn7U] || vexRT[Btn7D]) ||
                  vexRT[Btn7U] || vexRT[Btn7R]) {
             break;
         }
-        initClawMovement (1950);
+        if (vexRT[Btn7R]) {
+        	curTargetClawPos = 2900;
+        }
+        initClawMovement ();
+        EndTimeSlice();
     }
-    clawInAction = false;
+    flippingOnBot = false;
 }
-
 bool clawAssistOn = false, clawInManualControl = false;
 task clawAssist () {
     while (true) {
         if (vexRT[Btn7R]) {
             while (vexRT[Btn7R]) { }
             clawAssistOn = !clawAssistOn;
+            curTargetClawPos = 600;
             moveClawDown (600);
         }
         if (clawAssistOn && !clawInAction && !clawInManualControl) {
-            initClawMovement (900);
+        	curTargetClawPos = 900;
+            initClawMovement ();
         }
         EndTimeSlice ();
     }
 }
+*/
+
 
 task claw () {
     while (true) {
         if (vexRT[Btn5U] && vexRT[Btn5D]) {
             if (vexRT[Btn7U]) {
-                clawInManualControl = true;
-                motor[mClaw] = 127;
+            	//while (vexRT[Btn7U]) { wait1Msec (1); }
+            	curTargetClawPos += 250;
+            	moveClawUp (curTargetClawPos - 30);
             } else if (vexRT[Btn7D]) {
-                clawInManualControl = true;
-                motor[mClaw] = -127;
-            } else {
-                clawInManualControl = false;
-                motor[mClaw] = 0;
+            	//while (vexRT[Btn7D]) { wait1Msec (1); }
+            	curTargetClawPos -= 250;
+            	motor[mClaw] = -30;
+            	wait1Msec (100);
+            	motor[mClaw] = 0;
             }
         } else {
-            if (vexRT[Btn7R]) {
+            if (vexRT[Btn7D]) {
                 moveClawDown (600);
+            	curTargetClawPos = 430;
             }
             if (vexRT[Btn7U]) { // flip on ground
                 moveClawUp (1500);
-                moveClawDown (600);
+                moveClawDown (550);
+                curTargetClawPos = 430;
             }
-            if (vexRT[Btn7D]) { // flip on bot
-                //moveClawUp (2000); // change this number to change the target pot position
-                moveClawUp (2150);
-                motor[mClaw] = 0;
-                flipOnBot();
+            if (vexRT[Btn7R]) { // flip on bot
+            	if (curClawPos > 1850 && curClawPos < 2250) {
+            		moveClawUp(2400);
+	    			curTargetClawPos = 2650;
+            	} else {
+	                moveClawUp (2150);
+	                motor[mClaw] = 0;
+	    			curTargetClawPos = 1950;
+	    		}
             }
         }
+        initClawMovement();
         EndTimeSlice();
     }
 }
@@ -423,14 +440,13 @@ task drive() {
 }
 
 task usercontrol() {
-    startTask(drive);
-    startTask(ballIntake);
-    startTask(flyWheel);
-    startTask(lifter);
-    startTask(claw);
-    startTask(clawAssist);
-    startTask(LED_Update);
-  while (true) {
-    EndTimeSlice();
-  }
+	startTask(drive);
+	startTask(ballIntake);
+	startTask(flyWheel);
+	startTask(lifter);
+	startTask(claw);
+	startTask(LED_Update);
+	while (true) {
+		EndTimeSlice();
+	}
 }
