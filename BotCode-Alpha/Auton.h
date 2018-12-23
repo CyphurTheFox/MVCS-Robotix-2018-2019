@@ -1,26 +1,6 @@
-tSensors potClaw = Claw;
 tMotor mIntake = mGRB;
-tMotor mLift = mLFT;
-tMotor mClaw = mCLW;
 tMotor mFlyWheelR = mFRE;
 tMotor mFlyWheelL = mFRE2;
-
-
-void moveClawUp (int toPos) {
-    clearTimer(T1); // set timer in order to prevent burning out motors
-    while (SensorValue[potClaw] < toPos && time1[T1] < 3000) {
-        motor[mClaw] = 127;
-    }
-    motor[mClaw] = 0;
-}
-void moveClawDown (int toPos) {
-    clearTimer(T1); // set timer in order to prevent burning out motors
-    while (SensorValue[potClaw] > toPos && time1[T1] < 3000) {
-        motor[mClaw] = -77;
-    }
-    motor[mClaw] = 0;
-}
-
 
 /*
  goFoward function doc
@@ -85,7 +65,7 @@ void goFoward (int direction, int distance) {
         } else {
             motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
         }
-        
+
         motor[mFL] = mListDirection[0][direction] * motorPower[0];
         motor[mFR] = mListDirection[1][direction] * motorPower[1];
         motor[mBL] = mListDirection[2][direction] * motorPower[2];
@@ -94,7 +74,7 @@ void goFoward (int direction, int distance) {
     motor[mFL] = motor[mFR] = motor[mBL] = motor[mBR] = 0;
 }
 
-void turn (int power, int distance) {
+void turn (int power, unsigned int distance) {
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
     resetEncoderValues();
     while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) + abs (SensorValue[encBL]) + abs (SensorValue[encBR]) < distance) {

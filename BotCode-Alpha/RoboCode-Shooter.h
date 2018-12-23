@@ -1,17 +1,8 @@
-
-/* ------------------------IMPORTANT-----------------------------*/
-/* USE SEPARATE TASKS FOR EVERYTHING,                            */
-/* IT ACCOMPLISHES THE SAME THING AS PUTTING EVERYTHING IN MAIN, */
-/* BUT IT'S MORE ORGANIZED AND HELPS DEBUG                       */
-/*-------------------------IMPORTANT-----------------------------*/
-
-
-
 task ballGrabber(){ //Ball intake system code
     while(true){
-        if (intakeI || intake) { //if intake button pressed...
+        if (intakeI) { //if intake button pressed...
             motor[mGRB] = 127; //run intake motor
-            } else if (intakeO || intakeReverse) { //if reverse button Pressed
+            } else if (intakeO) { //if reverse button Pressed
             motor[mGRB] = -127; // reverse
             } else {
             motor[mGRB] = 0; //else stop
@@ -19,7 +10,6 @@ task ballGrabber(){ //Ball intake system code
         EndTimeSlice(); //tell task handler done
     }
 }
-
 
 task LEDControl(){      //task to turn LED on & off
     while(true){
@@ -48,7 +38,6 @@ task LEDControl(){      //task to turn LED on & off
     }
 }
 
-
 task flywheelToggle() { //detects button presses to toggle the flywheel
     while (true) {
         if (toggleFly) { //if toggle button pressed
@@ -68,7 +57,6 @@ task flywheelToggle() { //detects button presses to toggle the flywheel
         EndTimeSlice(); //tell task handler done
     }
 }
-
 
 task flySpeedAdjuster() {       //Adjust the flywheel Speeds
     while(true){
@@ -108,4 +96,3 @@ task flySpeedAdjuster() {       //Adjust the flywheel Speeds
         }
     }
 }
-
