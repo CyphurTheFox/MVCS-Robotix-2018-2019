@@ -117,10 +117,10 @@ void turn (int power, int distance) {
 }
 
 void autonLeft() {
-	goFoward(9, 25);
-	goFoward(12, 930);
+	goForward(9, 25);
+	goForward(12, 930);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-	goFoward(6, 710);
+	goForward(6, 710);
 	motor[mIntake] = 127;
 	wait1Msec(2500);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
@@ -128,10 +128,10 @@ void autonLeft() {
 
 
 void autonRight() {
-	goFoward(3, 25);
-	goFoward(12, 930);
+	goForward(3, 25);
+	goForward(12, 930);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-	goFoward(6, 710);
+	goForward(6, 710);
 	motor[mIntake] = 127;
 	wait1Msec(2500);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
