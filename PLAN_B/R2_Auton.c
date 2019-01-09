@@ -117,8 +117,12 @@ void turn (int power, int distance) {
 }
 
 void autonLeft() {
-	goForward(9, 25);
-	goForward(12, 930);
+	goForward(6, 220);
+	motor[mClaw] = -127;
+	wait1Msec(1000);
+	motor[mClaw] = 0;
+	turn(-127, 50);
+	goForward(12, 1300);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
 	goForward(6, 710);
 	motor[mIntake] = 127;
@@ -128,8 +132,12 @@ void autonLeft() {
 
 
 void autonRight() {
-	goForward(3, 25);
-	goForward(12, 930);
+	goForward(6, 220);
+	motor[mClaw] = -127;
+	wait1Msec(1000);
+	motor[mClaw] = 0;
+	turn(127, 50);
+	goForward(12, 1300);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
 	goForward(6, 710);
 	motor[mIntake] = 127;
@@ -138,16 +146,25 @@ void autonRight() {
 
 }
 
+/* void autontest () {
+	goForward(6, 220);
+	motor[mClaw] = -127;
+	wait1Msec(1000);
+	motor[mClaw] = 0;
+} */
+
+
 
 void auton() {
     //turn(127, 1200);
     //return;
-    if (SensorValue[potAuton] < 800) {
+     if (SensorValue[potAuton] < 800) {
         autonLeft();
     } else if (SensorValue[potAuton] > 2700) {
         autonRight();
-
   }
+
+  	//autontest();
 
 }
 task main() {
