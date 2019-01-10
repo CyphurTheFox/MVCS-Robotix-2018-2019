@@ -38,9 +38,13 @@
 
 #include "Vex_Competition_Includes.c"
 
+#include "PID.h"
+
 #define __DRIVE_SPEED_FACTOR_SLOW 0.5
 #define __FLYWHEEL_SECONDARY_SPEED 67
 
+#define __LIFT_POT_BOTTOM 122
+#DEFINE __LIFT_POT_LOW_SCORE 262
 
 void pre_auton() {
 	bStopTasksBetweenModes = true;
@@ -204,6 +208,7 @@ task clawAssist () {
 		EndTimeSlice ();
 	}
 }
+
 task clawControl(){  //basic motor control by 2 buttons
 	while(true){
 		if(vexRT[Btn7R]){
@@ -228,8 +233,32 @@ task Lift(){//basic motor control by 2 buttons
 		EndTimeSlice();
 	}
 }
+
+float potArm;
+float PIDOut;
+float armTarget;
+pidController LiftControl = {&potArm, &PIDOut, &armTarget, -0.1, -100, -0, -127, 127}
+
 task SmartLift(){
-	int bool stay=true;
+    armTarget = SensorValue[potLift];
+    while(true){
+        if(vexRT[Btn7U]){
+            while(vexRT[BTN7U]){wait1Msec(10);}
+            armTarget = __LIFT_POT_LOW_SCORE;
+            
+        }
+        if(vexRT[Btn7U]){
+            while(vexRT[BTN7U]){wait1Msec(10);}
+            armTarget = __LIFT_POT_BOTTOM;
+            
+        }
+        potArm = SensorValue[potLift]/10
+        compute(LiftControl);
+        //motor[mLift] = PIDOut;
+    }
+    
+    
+	/* int bool stay=true;
 	int pos=SensorValue[potLift];
 	while(true){
 		if(vexRT[Btn5U]){
@@ -246,7 +275,7 @@ task SmartLift(){
 			motor[mLift] = 0.1*(pos-SensorValue[potLift]);
 		}
 		EndTimeSlice();
-	}
+	} */
 }
 task claw () {
 	while (true) {
