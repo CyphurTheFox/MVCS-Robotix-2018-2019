@@ -75,7 +75,7 @@ void getEncoderValues (int direction) {
     encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
-const int encLeftRatio = 60, encRightRatio = 30;
+const int encLeftRatio = 60, encRightRatio = 57;
 
 bool encLeftGoesFurther (int direction) {
     if (direction == 12) {
@@ -140,19 +140,21 @@ void autonLeft () {
 
 void autonRight () {
     goForward (6, 100);
+    turn(-127, 60);
     motor[mClaw] = -127;
     wait1Msec(400);
     motor[mClaw] = 0;
     wait1Msec(400);
-    goForward (12, 950);
+    goForward (12, 1200);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goForward (6, 500);
+    goForward (6, 550);
     goForward (3, 70);
+    turn(-127, 100);
     motor[mIntake] = 127;
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
     goForward (12, 65);
-    turn(-127, 1320);
+    turn(-127, 1370);
     motor[mIntake] = -127;
     goForward (12, 400);
     motor[mIntake] = 0;
