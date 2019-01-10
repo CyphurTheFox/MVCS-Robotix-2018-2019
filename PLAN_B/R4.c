@@ -44,7 +44,7 @@
 #define __FLYWHEEL_SECONDARY_SPEED 67
 
 #define __LIFT_POT_BOTTOM 122
-#DEFINE __LIFT_POT_LOW_SCORE 262
+#define __LIFT_POT_LOW_SCORE 262
 
 void pre_auton() {
 	bStopTasksBetweenModes = true;
@@ -237,27 +237,31 @@ task Lift(){//basic motor control by 2 buttons
 float potArm;
 float PIDOut;
 float armTarget;
-pidController LiftControl = {&potArm, &PIDOut, &armTarget, -0.1, -100, -0, -127, 127}
-
+pidController LiftControl;
 task SmartLift(){
     armTarget = SensorValue[potLift];
+    LiftControl.Input = &potArm;
+    LiftControl.Output = &PIDOut;
+    LiftControl.Setpoint = &armTarget;
+    SetTunings(LiftControl, .1, 100, 0);
+    SetOutputLimits(LiftControl, -127, 127);
     while(true){
         if(vexRT[Btn7U]){
             while(vexRT[BTN7U]){wait1Msec(10);}
             armTarget = __LIFT_POT_LOW_SCORE;
-            
+
         }
         if(vexRT[Btn7U]){
             while(vexRT[BTN7U]){wait1Msec(10);}
             armTarget = __LIFT_POT_BOTTOM;
-            
+
         }
         potArm = SensorValue[potLift]/10
         compute(LiftControl);
         //motor[mLift] = PIDOut;
     }
-    
-    
+
+
 	/* int bool stay=true;
 	int pos=SensorValue[potLift];
 	while(true){
