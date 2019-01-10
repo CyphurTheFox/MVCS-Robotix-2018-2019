@@ -121,12 +121,13 @@ void autonLeft() {
 	motor[mClaw] = -127;
 	wait1Msec(1000);
 	motor[mClaw] = 0;
-	turn(-127, 50);
+	turn(-127, 45);
 	goForward(12, 1300);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
 	goForward(6, 710);
+	goForward(9, 55);
 	motor[mIntake] = 127;
-	wait1Msec(2500);
+	wait1Msec(1500);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
 }
 
@@ -136,12 +137,13 @@ void autonRight() {
 	motor[mClaw] = -127;
 	wait1Msec(1000);
 	motor[mClaw] = 0;
-	turn(127, 50);
+	turn(-127, 25);
 	goForward(12, 1300);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-	goForward(6, 710);
+	goForward(6, 725);
+	goForward(3, 35);
 	motor[mIntake] = 127;
-	wait1Msec(2500);
+	wait1Msec(1500);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
 
 }
