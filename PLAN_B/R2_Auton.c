@@ -7,11 +7,11 @@
 #pragma config(Sensor, dgtl9,  encBR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
 #pragma config(Motor,  port1,           mFL,           tmotorVex393_HBridge, openLoop, reversed)
-#pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop)
-#pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop)
+#pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop, reversed)
+#pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port4,           mIntake,       tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port5,           mLift,         tmotorVex393_MC29, openLoop, reversed)
-#pragma config(Motor,  port6,           mFR,           tmotorVex393_MC29, openLoop)
+#pragma config(Motor,  port6,           mFR,           tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port7,           mClaw,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port8,           mFlyWheelR,    tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port9,           mFlyWheelL,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -41,9 +41,9 @@ goForward function doc
 */
 int mListDirection[4][13] = // 0: FL, 1: FR, 2: BL, 3: BR
 {{0, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1},
-{0, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, -1},
 {0, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 1},
-{0, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1}};
+{0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1},
+{0, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1}};
 
 int mListDrive[13][4] = {{0, 0, 0, 0},
     {0, 0, 0, 0}, {0, 0, 0, 0}, {1, 3, 0, 2},  //  3 o'clock
@@ -52,10 +52,10 @@ int mListDrive[13][4] = {{0, 0, 0, 0},
     {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 1, 2, 3}}; // 12 o'clock
 
 int encListDrive[13][4] = {{0, 0, 0, 0},
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {-1, 1, 1, 1},    //  3 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {-1, -1, -1, 1},  //  6 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {1, -1, -1, -1},    //  9 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {1, 1, 1, -1}};     // 12 o'clock
+    {0, 0, 0, 0}, {0, 0, 0, 0}, {-1, 1, 1, -1},    //  3 o'clock
+    {0, 0, 0, 0}, {0, 0, 0, 0}, {-1, -1, -1, -1},  //  6 o'clock
+    {0, 0, 0, 0}, {0, 0, 0, 0}, {1, -1, -1, 1},    //  9 o'clock
+    {0, 0, 0, 0}, {0, 0, 0, 0}, {1, 1, 1, 1}};     // 12 o'clock
 
 int motorPower[4] = {0, 0, 0, 0};
 int encoderValues[4];
@@ -65,15 +65,15 @@ void resetEncoderValues () {
     encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = SensorValue[encBL] = SensorValue[encBR] = 0;
 }
 void getEncoderValues (int direction) {
-    encoderValues[0] = -SensorValue[encFL] * encListDrive[direction][0];
-    encoderValues[1] = -SensorValue[encFR] * encListDrive[direction][1];
-    encoderValues[2] =  SensorValue[encBL] * encListDrive[direction][2];
-    encoderValues[3] = -SensorValue[encBR] * encListDrive[direction][3];
+    encoderValues[0] = abs(SensorValue[encFL] * encListDrive[direction][0]);
+    encoderValues[1] = abs(SensorValue[encFR] * encListDrive[direction][1]);
+    encoderValues[2] = abs(SensorValue[encBL] * encListDrive[direction][2]);
+    encoderValues[3] = abs(SensorValue[encBR] * encListDrive[direction][3]);
     encLeft = (encoderValues[mListDrive[direction][0]] + encoderValues[mListDrive[direction][2]]) / 2;
     encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
-const int encLeftRatio = 60, encRightRatio = 52;
+const int encLeftRatio = 60, encRightRatio = 60;
 
 bool encLeftGoesFurther (int direction) {
     if (direction == 12) {
@@ -106,8 +106,7 @@ void goForward (int direction, int distance) {
 }
 
 void turn (int power, int distance) {
-    motor[mFL] = -power;
-    motor[mBL] = motor[mFR] = motor[mBR] = power;
+    motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
     resetEncoderValues();
     while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) + abs (SensorValue[encBL]) + abs (SensorValue[encBR]) < distance) {
         wait1Msec(1);
@@ -117,14 +116,59 @@ void turn (int power, int distance) {
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
 }
 
-
-
-void auton() {
-	goForward (6, 250);
+void autonLeft() {
+	goForward(6, 220);
+	motor[mClaw] = -127;
+	wait1Msec(1000);
+	motor[mClaw] = 0;
+	turn(-127, 45);
+	goForward(12, 1300);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+	goForward(6, 710);
+	goForward(9, 55);
+	motor[mIntake] = 127;
+	wait1Msec(1500);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
 }
 
 
+void autonRight() {
+	goForward(6, 220);
+	motor[mClaw] = -127;
+	wait1Msec(1000);
+	motor[mClaw] = 0;
+	turn(-127, 25);
+	goForward(12, 1300);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+	goForward(6, 725);
+	goForward(3, 35);
+	motor[mIntake] = 127;
+	wait1Msec(1500);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
 
+}
+
+/* void autontest () {
+	goForward(6, 220);
+	motor[mClaw] = -127;
+	wait1Msec(1000);
+	motor[mClaw] = 0;
+} */
+
+
+
+void auton() {
+    //turn(127, 1200);
+    //return;
+     if (SensorValue[potAuton] < 800) {
+        autonLeft();
+    } else if (SensorValue[potAuton] > 2700) {
+        autonRight();
+  }
+
+  	//autontest();
+
+}
 task main() {
-	auton();
+    auton();
 }
