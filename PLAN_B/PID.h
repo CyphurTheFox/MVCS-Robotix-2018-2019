@@ -60,13 +60,20 @@ void SetTunings(pidController PID, float Kp, float Ki, float Kd)
 void SetOutputLimits(pidController PID, float Min, float Max)
 {
     if(Min > Max) return;
-    PID.outMin = PID.Min;
-    PID.outMax = PID.Max;
+    PID.outMin = Min;
+    PID.outMax = Max;
     
     if(*PID.Output > PID.outMax) *PID.Output = PID.outMax;
     else if(*PID.Output < PID.outMin) *PID.Output = PID.outMin;
     
     if(PID.ITerm> PID.outMax) PID.ITerm= PID.outMax;
+    else if(PID.ITerm< PID.outMin) PID.ITerm= PID.outMin;
+}
+void Initialize(pidController PID)
+{
+    PID.lastInput = *PID.Input;
+    PID.ITerm = *PID.Output;
+    if(PID.ITerm > PID.outMax) PID.ITerm= PID.outMax;
     else if(PID.ITerm< PID.outMin) PID.ITerm= PID.outMin;
 }
 
@@ -80,10 +87,4 @@ void SetMode(pidController PID, int Mode)
     PID.inAuto = newAuto;
 }
 
-void Initialize(pidController PID)
-{
-    PID.lastInput = *PID.Input;
-    PID.ITerm = *PID.Output;
-    if(PID.ITerm > PID.outMax) PID.ITerm= PID.outMax;
-    else if(PID.ITerm< PID.outMin) PID.ITerm= PID.outMin;
-}
+
