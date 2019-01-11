@@ -38,13 +38,9 @@
 
 #include "Vex_Competition_Includes.c"
 
-#include "PID.h"
-
 #define __DRIVE_SPEED_FACTOR_SLOW 0.5
 #define __FLYWHEEL_SECONDARY_SPEED 67
 
-#define __LIFT_POT_BOTTOM 122
-#define __LIFT_POT_LOW_SCORE 262
 
 void pre_auton() {
 	bStopTasksBetweenModes = true;
@@ -105,9 +101,7 @@ task flyWheel () {
 			flyWheelSpeed = __FLYWHEEL_SECONDARY_SPEED;
 			} else if (vexRT[Btn8D]) {
 			flyWheelSpeed = 0;
-			} else if (vexRT[Btn8R]) {
-			flyWheelSpeed = flyWheelSpeed_Memory;
-		}
+			}
 		if (vexRT[Btn6U] && vexRT[Btn6D]) {
 			if (vexRT[Btn8U]) {
 				while (vexRT[Btn8U]) {
@@ -208,7 +202,6 @@ task clawAssist () {
 		EndTimeSlice ();
 	}
 }
-
 task clawControl(){  //basic motor control by 2 buttons
 	while(true){
 		if(vexRT[Btn7R]){
@@ -233,38 +226,14 @@ task Lift(){//basic motor control by 2 buttons
 		EndTimeSlice();
 	}
 }
-
-float potArm;
-float PIDOut;
-float armTarget;
-pidController LiftControl;
 task SmartLift(){
-    armTarget = SensorValue[potLift];
-    LiftControl.Input = &potArm;
-    LiftControl.Output = &PIDOut;
-    LiftControl.Setpoint = &armTarget;
-    SetTunings(LiftControl, .1, 100, 0);
-    SetOutputLimits(LiftControl, -127, 127);
-    while(true){
-        if(vexRT[Btn7U]){
-            while(vexRT[BTN7U]){wait1Msec(10);}
-            armTarget = __LIFT_POT_LOW_SCORE;
-
-        }
-        if(vexRT[Btn7U]){
-            while(vexRT[BTN7U]){wait1Msec(10);}
-            armTarget = __LIFT_POT_BOTTOM;
-
-        }
-        potArm = SensorValue[potLift]/10
-        compute(LiftControl);
-        //motor[mLift] = PIDOut;
-    }
-
-
-	/* int bool stay=true;
+	int bool stay=true;
 	int pos=SensorValue[potLift];
 	while(true){
+		int pos1=Sensorvalue[potLift];
+		wait1Msec(10);
+		int pos2=Sensorvalue[potLift];
+		float v=(pos1-pos2)
 		if(vexRT[Btn5U]){
 			stay=false;
 			motor[mLift] = 127;
@@ -276,10 +245,17 @@ task SmartLift(){
 			stay=true;
 			motor[mLift] = 0;
 			}	else {
-			motor[mLift] = 0.1*(pos-SensorValue[potLift]);
+
+			motor[mLift] =0.2*(pos-SensorValue[potLift])+v;
+			if (vexRT[Btn7U]){
+				pos=2675
+			}
+			if (vexRT[Btn7D]){
+				pos=1236
+			}
 		}
 		EndTimeSlice();
-	} */
+	}
 }
 task claw () {
 	while (true) {
@@ -287,7 +263,7 @@ task claw () {
 			if (vexRT[Btn7U]) {
 				//clawInManualControl = true;
 				motor[mClaw] = 127;
-				} else if (vexRT[Btn7D]) {
+				} else if (vexRT[Btn8R]) {
 				//clawInManualControl = true;
 				motor[mClaw] = -127;
 				} else {
@@ -338,8 +314,8 @@ task drive() {
 			}
 
 		}
-		if (vexRT[Btn7D]) { // flip head
-			while (vexRT[Btn7D]) { wait1Msec(10);}
+		if (vexRT[Btn8R]) { // flip head
+			while (vexRT[Btn8R]) { wait1Msec(10);}
 			headflip = -headflip;
 		}
 		// Make sure at least one of the motors is running at full spead
