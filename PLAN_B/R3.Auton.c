@@ -118,43 +118,58 @@ void turn (int power, int distance) {
 }
 
 void autonLeft () {
-    goForward (12, 950);
+	goForward (6, 100);
+    turn(127, 20);
+    motor[mClaw] = -127;
+    wait1Msec(400);
+    motor[mClaw] = 0;
+    wait1Msec(400);
+    goForward (12, 875);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goForward (6, 500);
+    goForward (6, 430);
+    //500
     goForward (9, 90);
     motor[mIntake] = -127;
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
     goForward (12, 65);
-    turn(127, 1300);
+    turn(127, 1150);
+    //1300
     motor[mIntake] = 127;
-    goForward (12, 400);
+    goForward (12, 350);
     motor[mIntake] = 0;
-    goForward (12, 100);
-    goForward (3, 440);
+    goForward (12, 150);
+    goForward (3, 350);
     goForward (12, 300);
     goForward (3, 50);
     goForward (12, 50);
 }
 
 void autonRight () {
-    goForward (12, 950);
+
+    goForward (6, 100);
+    //turn(-127, 60);
+    motor[mClaw] = -127;
+    wait1Msec(400);
+    motor[mClaw] = 0;
+    wait1Msec(400);
+    goForward (12, 860);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goForward (6, 700);
-    goForward (3, 70);
+    goForward (6, 430);
+    goForward (3, 110);
     motor[mIntake] = -127;
     wait1Msec(2500);
     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    goForward (12, 250);
-    turn(-127, 1320);
+    goForward (12, 65);
+    turn(-127, 1000);
     motor[mIntake] = 127;
-    goForward (12, 400);
+    goForward (12, 350);
     motor[mIntake] = 0;
-    goForward (12, 200);
-    goForward (9, 550);
-    goForward (12, 270);
-    goForward (9, 40);
-    goForward (12, 50);
+    goForward (12, 150);
+    goForward (9, 420);
+    goForward (12, 150);
+    //goForward (9, 80);
+    //goForward (12, 50);
 }
 
 void auton() {
@@ -166,8 +181,9 @@ void auton() {
         autonRight();
     }
 }
-
+/*
 task main() {
     auton();
 
 }
+*//
