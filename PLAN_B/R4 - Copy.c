@@ -44,10 +44,10 @@
 #define __FLYWHEEL_SECONDARY_SPEED 67
 
 #define __LIFT_POT_BOTTOM 122
-#define __LIFT_POT_LOW_SCORE 304
+#define __LIFT_POT_LOW_SCORE 262
 
 void pre_auton() {
-//	bStopTasksBetweenModes = true;
+	bStopTasksBetweenModes = true;
 }
 
 
@@ -105,7 +105,8 @@ task flyWheel () {
 			flyWheelSpeed = __FLYWHEEL_SECONDARY_SPEED;
 			} else if (vexRT[Btn8D]) {
 			flyWheelSpeed = 0;
-			}
+			} else if (vexRT[Btn8R]) {
+			flyWheelSpeed = flyWheelSpeed_Memory;
 		}
 		if (vexRT[Btn6U] && vexRT[Btn6D]) {
 			if (vexRT[Btn8U]) {
@@ -126,6 +127,21 @@ task flyWheel () {
 		}
 		EndTimeSlice();
 	}
+}
+task lifter () { // task controlling the cascade-lift an the claw
+	while (true) {
+		if (vexRT[Btn5U] && vexRT[Btn5D]) {
+			motor[mLift] = 0;
+			}	else if (vexRT[Btn5U]) {
+			motor[mLift] = 127;
+			} else if (vexRT[Btn5D]) {
+			motor[mLift] = -127;
+			} else {
+			motor[mLift] = 0;
+		}
+		EndTimeSlice();
+	}
+}
 
 bool clawInAction = false;
 
@@ -217,7 +233,7 @@ task Lift(){//basic motor control by 2 buttons
 		EndTimeSlice();
 	}
 }
-
+/*
 float potArm;
 float PIDOut;
 float armTarget;
@@ -227,25 +243,23 @@ task SmartLift(){
     LiftControl.Input = &potArm;
     LiftControl.Output = &PIDOut;
     LiftControl.Setpoint = &armTarget;
-    SetTunings(LiftControl, 1.5, .02, 0);
+    SetTunings(LiftControl, .1, .1, 0);
     SetOutputLimits(LiftControl, -127, 127);
-    SetMode(LiftControl, AUTOMAT);
+    SetMode(LiftControl, AUTOMATIC);
     while(true){
         if(vexRT[Btn7U]){
             while(vexRT[BTN7U]){wait1Msec(10);}
             armTarget = __LIFT_POT_LOW_SCORE;
 
         }
-        if(vexRT[Btn7D]){
-            while(vexRT[BTN7D]){wait1Msec(10);}
+        if(vexRT[Btn7U]){
+            while(vexRT[BTN7U]){wait1Msec(10);}
             armTarget = __LIFT_POT_BOTTOM;
 
         }
         potArm = SensorValue[potLift]/10
         compute(LiftControl);
-        if(LiftControl.inAuto){
-        	motor[mLift] = PIDOut;
-      	}
+        motor[mLift] = PIDOut;
         EndTimeSlice();
     }
 
@@ -267,8 +281,8 @@ task SmartLift(){
 			motor[mLift] = 0.1*(pos-SensorValue[potLift]);
 		}
 		EndTimeSlice();
-	}*/
-}
+	}
+}*/
 task claw () {
 	while (true) {
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
@@ -326,8 +340,8 @@ task drive() {
 			}
 
 		}
-		if (vexRT[Btn8R]) { // flip head
-			while (vexRT[Btn8R]) { wait1Msec(10);}
+		if (vexRT[Btn7D]) { // flip head
+			while (vexRT[Btn7D]) { wait1Msec(10);}
 			headflip = -headflip;
 		}
 		// Make sure at least one of the motors is running at full spead
@@ -355,35 +369,13 @@ task drive() {
 	}
 }
 
-task lifter () { // task controlling the cascade-lift an the claw
-	while (true) {
-		if (vexRT[Btn5U] && vexRT[Btn5D]) {
-			motor[mLift] = 0;
-			}	else if (vexRT[Btn5U]) {
-			motor[mLift] = 127;
-			} else if (vexRT[Btn5D]) {
-			motor[mLift] = -127;
-			} else if(!LiftControl.inAuto){
-			motor[mLift] = 0;
-		}
-		if(vexRT[Btn5U] || vexRT[Btn5D]){
-			SetMode(LiftControl, MANU);
-		} else if(!LiftControl.inAuto){
-			potArm = SensorValue[potLift]/10;
-			SetMode(LiftControl,AUTOMAT);
-		}
-		EndTimeSlice();
-	}
-}
-
 task usercontrol() {
 	startTask(drive);
 	startTask(ballIntake);
 	startTask(flyWheel);
-	startTask(SmartLift);
+	//startTask(SmartLift);
 	startTask(clawControl);
 	startTask(LED_Update);
-	startTask(lifter);
 	while (true) {
 		EndTimeSlice();
 	}
