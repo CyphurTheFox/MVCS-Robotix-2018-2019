@@ -6,12 +6,12 @@
 #pragma config(Sensor, dgtl7,  encBL,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl9,  encBR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
-#pragma config(Motor,  port1,           mFL,           tmotorVex393_HBridge, openLoop, reversed)
-#pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop, reversed)
-#pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop, reversed)
+#pragma config(Motor,  port1,           mFL,           tmotorVex393_HBridge, openLoop)
+#pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop)
+#pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           mIntake,       tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port5,           mLift,         tmotorVex393_MC29, openLoop, reversed)
-#pragma config(Motor,  port6,           mFR,           tmotorVex393_MC29, openLoop, reversed)
+#pragma config(Motor,  port6,           mFR,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port7,           mClaw,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port8,           mFlyWheelR,    tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port9,           mFlyWheelL,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -117,17 +117,17 @@ void turn (int power, int distance) {
 }
 
 void autonLeft() {
-	goForward(6, 220);
+	goForward(12, 220);
 	motor[mClaw] = -127;
 	wait1Msec(1000);
 	motor[mClaw] = 0;
-	turn(-127, 45);
-	goForward(12, 1300);
+	turn(127, 45);
+	goForward(6, 1300);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-	goForward(6, 710);
-	goForward(9, 55);
+	goForward(12, 710);
+	goForward(3, 55);
 	motor[mIntake] = 127;
-	wait1Msec(1500);
+	wait1Msec(3000);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
 }
 
@@ -143,30 +143,31 @@ void autonRight() {
 	goForward(6, 725);
 	goForward(3, 35);
 	motor[mIntake] = 127;
-	wait1Msec(1500);
+	wait1Msec(7000);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
+	wait1Msec(500);
+	goForward(6, 200);
 
 }
 
-/* void autontest () {
-	goForward(6, 220);
-	motor[mClaw] = -127;
-	wait1Msec(1000);
-	motor[mClaw] = 0;
-} */
+ void autontest () {
+	goForward(6, 200);
+	turn(-127, 1400);
+
+}
 
 
 
 void auton() {
     //turn(127, 1200);
     //return;
-     if (SensorValue[potAuton] < 800) {
+    /* if (SensorValue[potAuton] < 800) {
         autonLeft();
     } else if (SensorValue[potAuton] > 2700) {
         autonRight();
-  }
+  } */
 
-  	//autontest();
+  	autontest();
 
 }
 task main() {
