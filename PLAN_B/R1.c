@@ -106,7 +106,7 @@ void getEncoderValues (int direction) {
     encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
-const int encLeftRatio = 60, encRightRatio = 57;
+const int encLeftRatio = 60, encRightRatio = 58;
 
 bool encLeftGoesFurther (int direction) {
     if (direction == 12) {
