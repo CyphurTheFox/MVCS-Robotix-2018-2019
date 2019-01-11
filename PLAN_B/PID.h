@@ -1,4 +1,4 @@
-#define sampleTime 100
+#define sampleTime 10
 
 typedef struct pidController {
     float *Input;
@@ -21,8 +21,8 @@ typedef struct pidController {
  *
  *   pidController <name> = {&<Input>, &<Output>, &<Setpoint>, Kp, Ki, Kd, outMin, outMax}
  */
-#define MANUAL 0
-#define AUTOMATIC 1
+#define MANU 0
+#define AUTOMAT 1
 
 void Compute(pidController PID)
 {
@@ -37,12 +37,12 @@ void Compute(pidController PID)
         if(PID.ITerm > PID.outMax) PID.ITerm= PID.outMax;
         else if(PID.ITerm< PID.outMin) PID.ITerm= PID.outMin;
         float dInput = (*PID.Input - PID.lastInput);
-        
+
         /*Compute PID Output*/
         *PID.Output = PID.kp * error + PID.ITerm - PID.kd * dInput;
         if(*PID.Output > PID.outMax) *PID.Output = PID.outMax;
         else if(*PID.Output < PID.outMin) *PID.Output = PID.outMin;
-        
+
         /*Remember some variables for next time*/
         PID.lastInput = *PID.Input;
         PID.lastTime = now;
@@ -51,7 +51,6 @@ void Compute(pidController PID)
 
 void SetTunings(pidController PID, float Kp, float Ki, float Kd)
 {
-    double SampleTimeInSec = sampleTime/1000;
     PID.kp = Kp;
     PID.ki = Ki;
     PID.kd = Kd;
@@ -62,10 +61,10 @@ void SetOutputLimits(pidController PID, float Min, float Max)
     if(Min > Max) return;
     PID.outMin = Min;
     PID.outMax = Max;
-    
+
     if(*PID.Output > PID.outMax) *PID.Output = PID.outMax;
     else if(*PID.Output < PID.outMin) *PID.Output = PID.outMin;
-    
+
     if(PID.ITerm> PID.outMax) PID.ITerm= PID.outMax;
     else if(PID.ITerm< PID.outMin) PID.ITerm= PID.outMin;
 }
@@ -73,18 +72,17 @@ void Initialize(pidController PID)
 {
     PID.lastInput = *PID.Input;
     PID.ITerm = *PID.Output;
+    *PID.Setpoint = *PID.Input;
     if(PID.ITerm > PID.outMax) PID.ITerm= PID.outMax;
     else if(PID.ITerm< PID.outMin) PID.ITerm= PID.outMin;
 }
 
 void SetMode(pidController PID, int Mode)
 {
-    bool newAuto = (Mode == AUTOMATIC);
+    bool newAuto = (Mode == AUTOMAT);
     if(newAuto && !PID.inAuto)
     {  /*we just went from manual to auto*/
         Initialize(PID);
     }
     PID.inAuto = newAuto;
 }
-
-
