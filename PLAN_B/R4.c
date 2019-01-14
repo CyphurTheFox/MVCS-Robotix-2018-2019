@@ -151,6 +151,17 @@ void turn (int power, int distance) {
     wait1Msec(50);
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
 }
+#define driveF(h) goForward(6,h)
+#define driveB(h) goForward(12,h)
+#define driveL(h) goForward(3,h)
+#define driveR(h) goForward(9,h)
+
+void autonBack(){
+    motor[mIntake] = 127;
+    driveF(450);
+    motor[mIntake] = 0;
+    driveB(200);
+}
 
 void autonLeft () {
     goForward (6, 900);
