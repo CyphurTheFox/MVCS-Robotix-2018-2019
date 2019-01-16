@@ -327,9 +327,9 @@ bool clawAssistOn = false, clawInManualControl = false;
 task clawControl(){  //basic motor control by 2 buttons
 	while(true){
 		if(vexRT[Btn7R]){
-			motor[mClaw] = 40;
+			motor[mClaw] = 50;
 			} else if (vexRT[Btn7L]) {
-			motor[mClaw] = -40;
+			motor[mClaw] = -50;
 			} else {
 			motor[mClaw] = 0;
 		}
@@ -363,6 +363,9 @@ task SmartLift(){
 			}
 			if (vexRT[Btn7D]){
 				pos=1236
+				motor[mClaw]=-60;
+				wait1Msec(100);
+				motor[mClaw]=0;
 			}
 		}
 		EndTimeSlice();
