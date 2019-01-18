@@ -1,4 +1,4 @@
-#pragma config(Sensor, in1,    potClaw,        sensorPotentiometer)
+#pragma config(Sensor, in1,    potSelect,        sensorPotentiometer)
 #pragma config(Sensor, in2,    potLift,        sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  encFR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  jumper,         sensorDigitalIn)
@@ -88,6 +88,7 @@ void goForward (int direction, int distance) {
 	motor[mFL] = motor[mFR] = motor[mBL] = motor[mBR] = 0;
 }
 
+
 void turn (int power, int distance) {
 	motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
 	resetEncoderValues();
@@ -99,10 +100,12 @@ void turn (int power, int distance) {
 	motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
 }
 void autonBack(){
-	motor[mIntake] = 127;
-	goForward(12,500);
-	motor[mIntake] = 0;
 	goForward(6,200);
+	motor[mLift] = 127
+	motor[mIntake] = 127;
+	goForward(6,500);
+	motor[mIntake] = 0;
+	goForward(12,200);
 }
 
 void autonLeft () {
@@ -145,21 +148,23 @@ void autonRight() {
 	wait1Msec(800);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
 	goForward(9,100);
-	turn(127,1040);
+	turn(127,1020);
 	goForward(3, 50);
 	goForward(6,500);
 	goForward(12,475);
 	motor[mIntake] = 0;
-	turn(-127, 1020);
-	goForward(3, 25);
+	turn(-127, 1025);
+	goForward(3, 45);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
 	wait1Msec(2000);
 	goForward(6, 200);
 	wait1Msec(100);
+	turn(-127, 20);
 	motor[mIntake] = 127;
-	wait1Msec(500);
-	goForward(6, 500);
+	wait1Msec(2000);
 	motor[mIntake] = motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
+	goForward(3, 50);
+	goForward(6, 500);
 	goForward(12, 450);
 	/*
 	goForward (12, 200);
@@ -182,13 +187,20 @@ void auton() {
 	//goForward (3, 4000);
 	//turn(127, 1200);
 	//return;
-	/*if (SensorValue[jumper] == 0) {
-	autonLeft();
-	}// else if (SensorValue[potAuton] > 2700) {
+	if (SensorValue[jumper] == 0) {
+		if(SensorValue[potSelect] < 1150) {
+			//autonLeft();
+		} else if (SensorValue[potSelect] > 2650){
+			autonRight();
+		} else {
+			autonBack();
+		}
+
+
+	}
+	// else if (SensorValue[potAuton] > 2700) {
 	//    autonRight();
 	//}
-	*/
-	autonRight();
 }
 
 task main()
