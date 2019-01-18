@@ -103,23 +103,40 @@ void autonBack(){
 	goForward(6,200);
 	motor[mLift] = 127
 	motor[mIntake] = 127;
-	goForward(6,500);
+	goForward(6,700);
 	motor[mIntake] = 0;
 	goForward(12,200);
 }
 
 void autonLeft () {
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-	wait1Msec(1000);
-	motor[mIntake] = 127;
 	motor[mLift] = 127;
-	wait1Msec(100);
-	motor[mClaw] = 0;
-	wait1Msec(700);
-	motor[mIntake] = 0;
+	wait1Msec(10);
+	motor[mLift] = 0;
+	goForward(3,100);
+	wait1Msec(2000);
+	motor[mIntake] = 127;
+	wait1Msec(800);
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
-	goForward(9,200);
-	turn(127,100);
+	goForward(3,100);
+	turn(-127,1020);
+	goForward(3, 50);
+	goForward(6,500);
+	goForward(12,475);
+	motor[mIntake] = 0;
+	turn(-127, 1025);
+	goForward(9, 45);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+	wait1Msec(2000);
+	goForward(6, 200);
+	wait1Msec(100);
+	turn(127, 20);
+	motor[mIntake] = 127;
+	wait1Msec(2000);
+	motor[mIntake] = motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
+	goForward(9, 50);
+	goForward(6, 500);
+	goForward(12, 450);
 	/*
 	goForward (12, 200);
 	motor[mIntake] = 127;
@@ -127,7 +144,7 @@ void autonLeft () {
 	wait1Msec(700);
 	motor[mIntake] = 0;
 	goForward (6, 100);
-	turn(127,-100);s
+	turn(127,-100);
 	goForward(300);
 	motor[mIntake] = 127;
 	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
