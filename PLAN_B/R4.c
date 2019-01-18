@@ -157,65 +157,128 @@ void turn (int power, int distance) {
 #define driveR(h) goForward(9,h)
 
 void autonBack(){
+    goForward(6,200);
+    motor[mLift] = 127;
+    wait1Msec(10);
+    motor[mLift] = 0;
     motor[mIntake] = 127;
-    driveF(500);
+    goForward(6,700);
     motor[mIntake] = 0;
-    driveB(200);
+    goForward(12,200);
 }
 
 void autonLeft () {
-    goForward (6, 900);
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goForward (12, 500);
-    goForward (3, 100);
-    turn(127, 100);
+    motor[mLift] = 127;
+    wait1Msec(10);
+    motor[mLift] = 0;
+    goForward(3,100);
+    wait1Msec(2000);
     motor[mIntake] = 127;
-    wait1Msec(3500);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    goForward (6, 65);
-    turn(-127, 1200);
-    motor[mIntake] = -127;
-    goForward (6, 450);
+    wait1Msec(800);
+    motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
+    goForward(3,100);
+    turn(-127,1020);
+    goForward(3, 50);
+    goForward(6,500);
+    goForward(12,475);
     motor[mIntake] = 0;
-    driveB(300);
-    driveR(300);
+    turn(-127, 1025);
+    goForward(9, 45);
+    motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+    wait1Msec(2000);
+    goForward(6, 200);
+    wait1Msec(100);
+    turn(127, 20);
     motor[mIntake] = 127;
-    driveF(300);
-    motor[mIntake] = 0;
-    driveB(300);
+    wait1Msec(2000);
+    motor[mIntake] = motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
+    goForward(9, 50);
+    goForward(6, 500);
+    goForward(12, 450);
+    /*
+     goForward (12, 200);
+     motor[mIntake] = 127;
+     goForward (12, 200);
+     wait1Msec(700);
+     motor[mIntake] = 0;
+     goForward (6, 100);
+     turn(127,-100);
+     goForward(300);
+     motor[mIntake] = 127;
+     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+     wait1Msec(3500);
+     motor[mIntake]= 0;
+     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
+     goForward (12,300);
+     */
 }
-
-void autonRight () {
-    goForward (6, 900);
+void autonRight() {
     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    goForward (12, 500);
-    goForward (9, 100);
-    turn(127, 100);
+    motor[mLift] = 127;
+    wait1Msec(10);
+    motor[mLift] = 0;
+    goForward(9,100);
+    wait1Msec(2000);
     motor[mIntake] = 127;
-    wait1Msec(3500);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    goForward (6, 65);
-    turn(127, 1200);
-    motor[mIntake] = -127;
-    goForward (6, 450);
+    wait1Msec(800);
+    motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
+    goForward(9,100);
+    turn(127,1020);
+    goForward(3, 50);
+    goForward(6,500);
+    goForward(12,475);
     motor[mIntake] = 0;
-    driveB(300);
-    driveL(300);
+    turn(-127, 1025);
+    goForward(3, 45);
+    motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+    wait1Msec(2000);
+    goForward(6, 200);
+    wait1Msec(100);
+    turn(-127, 20);
     motor[mIntake] = 127;
-    driveF(300);
-    motor[mIntake] = 0;
-    driveB(300);
+    wait1Msec(2000);
+    motor[mIntake] = motor[mFlyWheelL] = motor[mFlyWheelR] = 0;
+    goForward(3, 50);
+    goForward(6, 500);
+    goForward(12, 450);
+    /*
+     goForward (12, 200);
+     motor[mIntake] = 127;
+     goForward (12, 200);
+     wait1Msec(700);
+     motor[mIntake] = 0;
+     goForward (6, 100);
+     turn(127,-100);
+     goForward(300);
+     motor[mIntake] = 127;
+     motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+     wait1Msec(3500);
+     motor[mIntake]= 0;
+     motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
+     goForward (12,300);
+     */
 }
 void auton() {
-	//goForward (3, 4000);
+    //goForward (3, 4000);
     //turn(127, 1200);
     //return;
     if (SensorValue[jumper] == 0) {
-        autonLeft();
-    }// else if (SensorValue[potAuton] > 2700) {
+        if(SensorValue[potSelect] < 1150) {
+            //autonLeft();
+        } else if (SensorValue[potSelect] > 2650){
+            autonRight();
+        } else {
+            autonBack();
+        }
+        
+        
+    }
+    // else if (SensorValue[potAuton] > 2700) {
     //    autonRight();
     //}
 }
+
 
 task autonomous() {
 	auton();
