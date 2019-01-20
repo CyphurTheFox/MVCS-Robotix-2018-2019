@@ -267,10 +267,10 @@ void auton() {
     if (SensorValue[jumper] == 0) {
         if(SensorValue[potSelect] < 1150) {
             autonLeft();
-        } else if (SensorValue[potSelect] > 2650){
+        } else if (SensorValue[potSelect] > 3000){
             autonRight();
         } else {
-            autonBack();
+            //autonBack();
         }
 
 
