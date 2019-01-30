@@ -1,10 +1,9 @@
 #pragma config(Sensor, in1,    potSelect,      sensorPotentiometer)
 #pragma config(Sensor, in2,    potLift,        sensorPotentiometer)
-#pragma config(Sensor, dgtl1,  encBL,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl3,  jumper,         sensorDigitalIn)
-#pragma config(Sensor, dgtl5,  encFR,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl7,  encLift,        sensorQuadEncoder)
-#pragma config(Sensor, dgtl9,  encBR,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl2,  jumper,         sensorDigitalIn)
+#pragma config(Sensor, dgtl3,  encFR,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  sonarLeft,      sensorSONAR_raw)
+#pragma config(Sensor, dgtl7,  sonarRight,     sensorSONAR_raw)
 #pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
 #pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           mLift,         tmotorVex393_MC29, openLoop, reversed)
@@ -80,13 +79,11 @@ int encoderValues[4];
 
 int encLeft, encRight;
 void resetEncoderValues () {
-    encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = SensorValue[encBL] = SensorValue[encBR] = 0;
+    encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = 0;
 }
 void getEncoderValues (int direction) {
     encoderValues[0] = -SensorValue[encFL] * encListDrive[direction][0];
     encoderValues[1] = -SensorValue[encFR] * encListDrive[direction][1];
-    encoderValues[2] =  SensorValue[encBL] * encListDrive[direction][2];
-    encoderValues[3] = -SensorValue[encBR] * encListDrive[direction][3];
     encLeft = (abs(encoderValues[mListDrive[direction][0]]) + abs(encoderValues[mListDrive[direction][2]])) / 2;
     encRight = (abs(encoderValues[mListDrive[direction][1]]) + abs(encoderValues[mListDrive[direction][3]])) / 2;
 }
@@ -126,12 +123,12 @@ void goForward (int direction, int distance) {
 void turn (int power, int distance) {
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
     resetEncoderValues();
-    while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) + abs (SensorValue[encBL]) + abs (SensorValue[encBR]) < distance) {
+    while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) < distance) {
         wait1Msec(1);
     }
-    motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = power > 0 ? 35 : -35;
+    motor[mFL] = motor[mFR] =  power > 0 ? 35 : -35;
     wait1Msec(50);
-    motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
+    motor[mFL] = motor[mFR] = 0;
 }
 #define driveF(h) goForward(6,h)
 #define driveB(h) goForward(12,h)
