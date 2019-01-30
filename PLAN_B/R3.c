@@ -3,8 +3,8 @@
 #pragma config(Sensor, dgtl1,  encLift,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  LED,            sensorLEDtoVCC)
 #pragma config(Sensor, dgtl5,  encFR,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl7,  encBL,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl9,  encBR,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl7,  sonarLeft,      sensorSONAR_raw)
+#pragma config(Sensor, dgtl9,  sonarRight,     sensorSONAR_raw)
 #pragma config(Sensor, dgtl11, encFL,          sensorQuadEncoder)
 #pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop, reversed)
@@ -68,13 +68,11 @@ int encoderValues[4];
 
 int encLeft, encRight;
 void resetEncoderValues () {
-    encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = SensorValue[encBL] = SensorValue[encBR] = 0;
+    encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = 0;
 }
 void getEncoderValues (int direction) {
     encoderValues[0] = abs(SensorValue[encFL] * encListDrive[direction][0]);
     encoderValues[1] = abs(SensorValue[encFR] * encListDrive[direction][1]);
-    encoderValues[2] = abs(SensorValue[encBL] * encListDrive[direction][2]);
-    encoderValues[3] = abs(SensorValue[encBR] * encListDrive[direction][3]);
     encLeft = (encoderValues[mListDrive[direction][0]] + encoderValues[mListDrive[direction][2]]) / 2;
     encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
@@ -114,7 +112,7 @@ void goForward (int direction, int distance) {
 void turn (int power, int distance) {
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
     resetEncoderValues();
-    while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) + abs (SensorValue[encBL]) + abs (SensorValue[encBR]) < distance) {
+    while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) < distance) {
         wait1Msec(1);
     }
     motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = power > 0 ? 35 : -35;
