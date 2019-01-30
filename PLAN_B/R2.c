@@ -10,7 +10,6 @@
 #pragma config(Motor,  port2,           mBL,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           mBR,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           mIntake,       tmotorVex393_MC29, openLoop)
-#pragma config(Motor,  port5,           mLift,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port6,           mFR,           tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port7,           mClaw,         tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port8,           mFlyWheelR,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -192,7 +191,7 @@ int flyWheelSpeed_Memory = __FLYWHEEL_SECONDARY_SPEED;
 
 float driveFactor = 1.0;
 float FL, FR, BL, BR = 1.0;
-float headflip = -1.0
+float headflip = -1.0;
 
 task LED_Update () {
 	int LEDFlashStatus = 0;
@@ -259,56 +258,6 @@ task flyWheel () {
 		EndTimeSlice();
 	}
 }
-task lifter () { // task controlling the cascade-lift an the claw
-	while (true) {
-		if (vexRT[Btn5U] && vexRT[Btn5D]) {
-			motor[mLift] = 0;
-		}	else if (vexRT[Btn5U]) {
-			motor[mLift] = 127;
-		} else if (vexRT[Btn5D]) {
-			motor[mLift] = -127;
-		} else {
-			motor[mLift] = 0;
-		}
-		EndTimeSlice();
-	}
-}
-
-void moveClawUp (int toPos) {
-	clawInAction = true;
-	clearTimer(T1); // set timer in order to prevent burning out motors
-	while (SensorValue[potClaw] < toPos && time1[T1] < 3000) {
-		motor[mClaw] = 127;
-	}
-	motor[mClaw] = 0;
-	clawInAction = false;
-}
-void moveClawDown (int toPos) {
-	clawInAction = true;
-	clearTimer(T1); // set timer in order to prevent burning out motors
-	while (SensorValue[potClaw] > toPos && time1[T1] < 3000) {
-		motor[mClaw] = -77;
-	}
-	motor[mClaw] = 0;
-	clawInAction = false;
-}
-
-int curClawPos;
-
-void initClawMovement (int toPos) {
-	curClawPos = SensorValue[potClaw];
-	if (curClawPos < toPos) {
-		motor[mClaw] = 127;
-	} else if (curClawPos < toPos + 100) {
-		motor[mClaw] = 60;//(toPos - curClawPos) / 2;
-	} else if (curClawPos < toPos + 227) {
-		motor[mClaw] = 10;//(curClawPos - toPos) * 1;
-	} else if (curClawPos < toPos + 500) {
-		motor[mClaw] = 0;
-	} else {
-		motor[mClaw] = -10;
-	}
-}
 
 
 void flipOnBot () {
@@ -318,53 +267,33 @@ void flipOnBot () {
 				 vexRT[Btn7U] || vexRT[Btn7R]) {
 			break;
 		}
-		initClawMovement (1800);
 	}
-	clawInAction = false;
 }
 
-bool clawAssistOn = false, clawInManualControl = false;
-task clawAssist () {
-	while (true) {
-		if (vexRT[Btn7R]) {
-			while (vexRT[Btn7R]) { }
-			clawAssistOn = !clawAssistOn;
-			moveClawDown (600);
-		}
-		if (clawAssistOn && !clawInAction && !clawInManualControl) {
-			initClawMovement (900);
-		}
-		EndTimeSlice ();
-	}
+void moveClawUp() {
+	motor[mClaw] = 65;
+}
+
+void moveClawDown() {
+	motor[mClaw] = -65;
+}
+
+void moveClawStop() {
+	motor[mClaw] = 0;
+}
+
+void clawFlip(){
+	moveClawUp();
+	wait1Msec(500);
+	moveClawDown();
+	wait1Msec(300);
+	moveClawStop();
 }
 
 task claw () {
 	while (true) {
-		if (vexRT[Btn5U] && vexRT[Btn5D]) {
-			if (vexRT[Btn7U]) {
-				//clawInManualControl = true;
-				motor[mClaw] = 127;
-			} else if (vexRT[Btn7D]) {
-				//clawInManualControl = true;
-				motor[mClaw] = -127;
-			} else {
-				//clawInManualControl = false;
-				motor[mClaw] = 0;
-			}
-		} else {
-			if (vexRT[Btn7R]) {
-				moveClawDown(600);
-			}
-			if (vexRT[Btn7U]) { // flip on ground
-				moveClawUp(1500);
-				moveClawDown(600);
-			}
-			if (vexRT[Btn7D]) { // flip on bot
-				//moveClawUp (2000); // change this number to change the target pot position
-				moveClawUp(2050);
-				motor[mClaw] = 0;
-				flipOnBot();
-			}
+		if (vexRT[Btn7U]) {
+			clawFlip();
 		}
 		EndTimeSlice();
 	}
@@ -428,9 +357,7 @@ task usercontrol() {
 	startTask(drive);
 	startTask(ballIntake);
 	startTask(flyWheel);
-	startTask(lifter);
 	startTask(claw);
-	startTask(clawAssist);
 	startTask(LED_Update);
   while (true) {
     EndTimeSlice();
