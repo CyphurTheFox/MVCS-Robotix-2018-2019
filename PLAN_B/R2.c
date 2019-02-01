@@ -180,7 +180,7 @@ void auton() {
 
 
 task autonomous() {
-	auton();
+	//auton();
 }
 
 // USER CONTROL
