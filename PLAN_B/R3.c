@@ -1,7 +1,8 @@
-#pragma config(Sensor, in2,    potClaw,        sensorPotentiometer)
-#pragma config(Sensor, in3,    PotAuton,       sensorPotentiometer)
+#pragma config(Sensor, in2,    potAuton,       sensorPotentiometer)
+#pragma config(Sensor, in3,    potClaw,        sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  encLift,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  LED,            sensorLEDtoVCC)
+#pragma config(Sensor, dgtl4,  jumper,         sensorDigitalIn)
 #pragma config(Sensor, dgtl5,  encFR,          sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  sonarLeft,      sensorSONAR_raw)
 #pragma config(Sensor, dgtl9,  sonarRight,     sensorSONAR_raw)
@@ -19,7 +20,7 @@
 
 /*
 
- --- README ---
+--- README ---
 
 8U: Set flyWheel full speed
 8L: Set flyWheel half speed
@@ -43,160 +44,312 @@
 
 
 void pre_auton() {
-  bStopTasksBetweenModes = true;
+	//	bStopTasksBetweenModes = true;
 }
+bool flippingOnBot = false, clawInAction = false;
+
+/*
+goForward function doc
+direction can be one of the four: 12, 3, 6, 9
+let flyWheel be 12 o'clock
+lift facing 6 o'clock, etc
+*/
+int walldistR = 110;
+int walldistL = 130;
+float adjL = 0.7;
+float adjR = 0.7;
+//1.2
+
+/*
+goForward function doc
+direction can be one of the four: 12, 3, 6, 9
+let flyWheel be 12 o'clock
+lift facing 6 o'clock, etc
+*/
 int mListDirection[4][13] = // 0: FL, 1: FR, 2: BL, 3: BR
 {{0, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1},
-{0, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 1},
-{0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1},
-{0, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1}};
+	{0, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, 1},
+	{0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1},
+	{0, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1}};
 
 int mListDrive[13][4] = {{0, 0, 0, 0},
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {1, 3, 0, 2},  //  3 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 2, 1, 0},  //  6 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {2, 0, 3, 1},  //  9 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 1, 2, 3}}; // 12 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {1, 3, 0, 2},  //  3 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {3, 2, 1, 0},  //  6 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {2, 0, 3, 1},  //  9 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 1, 2, 3}}; // 12 o'clock
 
 int encListDrive[13][4] = {{0, 0, 0, 0},
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {-1, 1, 1, -1},    //  3 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {-1, -1, -1, -1},  //  6 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {1, -1, -1, 1},    //  9 o'clock
-    {0, 0, 0, 0}, {0, 0, 0, 0}, {1, 1, 1, 1}};     // 12 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {-1, 1, 1, -1},    //  3 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {-1, -1, -1, -1},  //  6 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {1, -1, -1, 1},    //  9 o'clock
+	{0, 0, 0, 0}, {0, 0, 0, 0}, {1, 1, 1, 1}};     // 12 o'clock
 
 int motorPower[4] = {0, 0, 0, 0};
 int encoderValues[4];
 
 int encLeft, encRight;
 void resetEncoderValues () {
-    encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = 0;
+	encLeft = encRight = SensorValue[encFL] = SensorValue[encFR] = 0;
 }
 void getEncoderValues (int direction) {
-    encoderValues[0] = abs(SensorValue[encFL] * encListDrive[direction][0]);
-    encoderValues[1] = abs(SensorValue[encFR] * encListDrive[direction][1]);
-    encLeft = (encoderValues[mListDrive[direction][0]] + encoderValues[mListDrive[direction][2]]) / 2;
-    encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
+	encoderValues[0] = -SensorValue[encFL] * encListDrive[direction][0];
+	encoderValues[1] = -SensorValue[encFR] * encListDrive[direction][1];
+	encoderValues[2] =  SensorValue[encFL] * encListDrive[direction][2];
+	encoderValues[3] = -SensorValue[encFR] * encListDrive[direction][3];
+	encLeft = (encoderValues[mListDrive[direction][0]] + encoderValues[mListDrive[direction][2]]) / 2;
+	encRight = (encoderValues[mListDrive[direction][1]] + encoderValues[mListDrive[direction][3]]) / 2;
 }
 
-const int encLeftRatio = 60, encRightRatio = 75;
+const int encLeftRatio = 60, encRightRatio = 60;
 
 bool encLeftGoesFurther (int direction) {
-    if (direction == 12) {
-        return encLeft * encLeftRatio > encRight * encRightRatio;
-    } else {
-        return encLeft > encRight;
-    }
+	if (direction == 12) {
+		return encLeft * encLeftRatio > encRight * encRightRatio;
+		} else {
+		return encLeft > encRight;
+	}
+}
+void goForward (int direction, int distance) {
+	if (mListDirection[0][direction] == 0) {
+		return;
+	}
+	resetEncoderValues();
+	while ((encLeft + encRight) / 2 < distance*550/900) {
+		/*
+		int V_i_BL = Sensorvalue[encBL]
+		wait1Msec(10)
+		int V_f_BL = Sensorvalue[encBL]
+		*/
+		getEncoderValues(direction);
+		if (direction == 12 ? abs(encLeft * encLeftRatio - encRight * encRightRatio) : abs(encLeft - encRight) > 30) {
+			motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeftGoesFurther(direction) ? 95 : 127;
+			motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeftGoesFurther(direction) ? 127 : 95;
+			} else {
+			motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
+		}
+
+		motor[mFL] = mListDirection[0][direction] * 127;
+		motor[mFR] = mListDirection[1][direction] *127;
+		motor[mBL] = mListDirection[2][direction]*127;
+		motor[mBR] = mListDirection[3][direction] *127;
+	}
+	motor[mFL] = motor[mFR] = motor[mBL] = motor[mBR] = 0;
 }
 
-void goForward (int direction, int distance) {
-    if (mListDirection[0][direction] == 0) {
-        return;
-    }
-    resetEncoderValues();
-    while ((encLeft + encRight) / 2 < distance) {
-        getEncoderValues(direction);
-        if (direction == 12 ? abs(encLeft * encLeftRatio - encRight * encRightRatio) : abs(encLeft - encRight) > 30) {
-            motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeftGoesFurther(direction) ? 95 : 127;
-            motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeftGoesFurther(direction) ? 127 : 95;
-        } else {
-            motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
-        }
+void FollowWallR (int direction, int distance) {
+	if (mListDirection[0][direction] == 0) {
+		return;
+	}
+	/*
+	while (abs(walldistR-SensorValue(sonR))>10) {
+	motor[mFR] = sgn(walldistR-SensorValue(sonR))*50
+	motor[mBR] = -50*sgn(walldistR-SensorValue(sonR))
+	motor[mFL] = 50*sgn(walldistR-SensorValue(sonR))
+	motor[mBL] = -50*sgn(walldistR-SensorValue(sonR))
+	EndTimeSlice();
+	}
+	*/
+	resetEncoderValues();
+	while ((encLeft + encRight)/2 < distance*550/900) {
+		/*
+		int V_i_BL = Sensorvalue[encBL]
+		wait1Msec(10)
+		int V_f_BL = Sensorvalue[encBL]
+		*/
+		getEncoderValues(direction);
+		if (direction == 12 ? abs(encLeft * encLeftRatio - encRight * encRightRatio) : abs(encLeft - encRight) > 30) {
+			motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeftGoesFurther(direction) ? 95 : 127;
+			motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeftGoesFurther(direction) ? 127 : 95;
+			} else {
+			motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
+		}
 
-        motor[mFL] = mListDirection[0][direction] * motorPower[0];
-        motor[mFR] = mListDirection[1][direction] * motorPower[1];
-        motor[mBL] = mListDirection[2][direction] * motorPower[2];
-        motor[mBR] = mListDirection[3][direction] * motorPower[3];
-    }
-    motor[mFL] = motor[mFR] = motor[mBL] = motor[mBR] = 0;
+		motor[mFR] = 127+adjR*(walldistR-SensorValue(sonarRight));
+		motor[mBR] = 127+adjR*(walldistR-SensorValue(sonarRight));
+		motor[mFL] = -127+adjR*(walldistR-SensorValue(sonarRight));
+		motor[mBL] = -127+adjR*(walldistR-SensorValue(sonarRight));
+		EndTimeSlice();
+	}
+	motor[mFL] = motor[mFR] = motor[mBL] = motor[mBR] = 0;
+}
+
+void FollowWallL (int direction, int distance) {
+	if (mListDirection[0][direction] == 0) {
+		return;
+	}
+	/*
+	while (abs(walldistL-SensorValue(sonL))>10) {
+	motor[mFR] = -sgn(walldistL-SensorValue(sonL))*50
+	motor[mBR] = 50*sgn(walldistL-SensorValue(sonL))
+	motor[mFL] = -50*sgn(walldistL-SensorValue(sonL))
+	motor[mBL] = 50*sgn(walldistL-SensorValue(sonL))
+	EndTimeSlice();
+	}
+	*/
+	resetEncoderValues();
+	while ((encLeft + encRight)/2 < distance*450/900) {
+		/*
+		int V_i_BL = Sensorvalue[encBL]
+		wait1Msec(10)
+		int V_f_BL = Sensorvalue[encBL]
+		*/
+		getEncoderValues(direction);
+		if (direction == 12 ? abs(encLeft * encLeftRatio - encRight * encRightRatio) : abs(encLeft - encRight) > 30) {
+			motorPower[mListDrive[direction][0]] = motorPower[mListDrive[direction][2]] = encLeftGoesFurther(direction) ? 95 : 127;
+			motorPower[mListDrive[direction][1]] = motorPower[mListDrive[direction][3]] = encLeftGoesFurther(direction) ? 127 : 95;
+			} else {
+			motorPower[0] = motorPower[1] = motorPower[2] = motorPower[3] = 127;
+		}
+
+		motor[mFR] = 127-adjL*(walldistL-SensorValue(sonarLeft));
+		motor[mBR] = 127-adjL*(walldistL-SensorValue(sonarLeft));
+		motor[mFL] = -127-adjL*(walldistL-SensorValue(sonarLeft));
+		motor[mBL] = -127-adjL*(walldistL-SensorValue(sonarLeft));
+		EndTimeSlice();
+	}
+	motor[mFL] = motor[mFR] = motor[mBL] = motor[mBR] = 0;
+}
+void TimeBackward(int time) {
+	motor[mFR] = -127;
+	motor[mBR] = -127;
+	motor[mFL] = 127;
+	motor[mBL] = 127;
+	wait1Msec(time);
+	motor[mFR] = 0;
+	motor[mBR] = 0;
+	motor[mFL] = 0;
+	motor[mBL] = 0;
+}
+void SoftForward(int time){
+	motor[mFR] = 80;
+	motor[mBR] = 80;
+	motor[mFL] = -80;
+	motor[mBL] = -80;
+	wait1Msec(time);
+	motor[mFR] = 0;
+	motor[mBR] = 0;
+	motor[mFL] = 0;
+	motor[mBL] = 0;
 }
 
 void turn (int power, int distance) {
-    motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
-    resetEncoderValues();
-    while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) < distance) {
-        wait1Msec(1);
-    }
-    motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = power > 0 ? 35 : -35;
-    wait1Msec(50);
-    motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
+	motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = -power;
+	resetEncoderValues();
+	while (abs (SensorValue[encFL]) + abs (SensorValue[encFR]) < distance/2) {
+		wait1Msec(1);
+	}
+	motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = power > 0 ? 35 : -35;
+	wait1Msec(50);
+	motor[mFL] = motor[mBL] = motor[mFR] = motor[mBR] = 0;
 }
+void autonBackLeft () {
+	goForward(12,400);
+	motor[mIntake] = 127;
+	goForward (12, 300);
+	wait1Msec(700);
+	motor[mIntake] = 0;
+	motor[mClaw]=-127;
+	goForward(6,220);
+	motor[mClaw]=0;
+	turn(-127,2625);
+	goForward(3,350);
+	goForward(6,150);
+	motor[mClaw]=127;
+	wait1Msec(800);
+	motor[mClaw]=0;
 
+}
+void autonBackRight () {
+	goForward(12,400);
+	motor[mIntake] = 127;
+	goForward (12, 300);
+	wait1Msec(700);
+	motor[mIntake] = 0;
+	motor[mClaw]=-127;
+	goForward(6,220);
+	motor[mClaw]=0;
+	turn(127,2625);
+	goForward(9,350);
+	goForward(6,150);
+	motor[mClaw]=127;
+	wait1Msec(800);
+	motor[mClaw]=0;
+
+}
 void autonLeft () {
-	/*
-	goForward (6, 100);
-    turn(127, 20);
-    motor[mClaw] = -127;
-    wait1Msec(400);
-    motor[mClaw] = 0;
-    wait1Msec(400);
-    */
-    goForward (12, 830);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    wait1Msec(1000);
-    turn(127, 50);
-    goForward (6, 500);
-    //500
-    goForward (9, 70);
-    motor[mIntake] = -127;
-    wait1Msec(2500);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    goForward (12, 60);
-    turn(127, 1150);
-    //1300
-    motor[mIntake] = 127;
-    goForward (12, 350);
-    goForward (12, 150);
-        motor[mIntake] = 0;
-    goForward (3, 400);
-    goForward (12, 300);
-    goForward (3, 50);
-    goForward (12, 50);
+	FollowWallL(12, 800);
+	//800
+	SoftForward (1100);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+	//TimeBackward(1300);
+	goForward (6, 374);
+	goForward (9, 30);
+	motor[mIntake] = 127;
+	wait1Msec(2500);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
+	//goForward (12, 65);
+	turn(127, 1350);
+	motor[mIntake] = -127;
+	goForward (12, 400);
+	motor[mIntake] = 0;
+	goForward (9, 425);
+	motor[mIntake] = 127;
+	goForward (12,100);
+	wait1Msec(1000);
+	motor[mIntake] = 0;
+	goForward(6,400);
+
 }
 
 void autonRight () {
-	/*
-    goForward (6, 100);
-    turn(-127, 60);
-    motor[mClaw] = -127;
-    wait1Msec(400);
-    motor[mClaw] = 0;
-    wait1Msec(400);
-    */
-    goForward (12, 830);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
-    wait1Msec(1000);
-    turn(-127, 25);
-    goForward (6, 500);
-    goForward (3, 70);
-    motor[mIntake] = -127;
-    wait1Msec(2500);
-    motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
-    goForward (12, 0);
-    turn(-127, 1175);
-    motor[mIntake] = 127;
-    goForward (12, 350);
-    //350
-    goForward (12, 150);
-    motor[mIntake] = 0;
-
-    goForward (9, 400);
-    goForward (12, 300);
-    goForward (9, 50);
-    goForward (12, 50);
+	FollowWallR (12, 800);
+	SoftForward (700);
+	//550
+	motor[mFlyWheelL] = motor[mFlyWheelR] = 127;
+	goForward (6, 425);
+	goForward (3, 90);
+	motor[mIntake] = 127;
+	wait1Msec(2500);
+	motor[mFlyWheelL] = motor[mFlyWheelR] = motor[mIntake] = 0;
+	//goForward (12, 65);
+	turn(-127, 1300);
+	motor[mIntake] = -127;
+	goForward (12, 375);
+	motor[mIntake] = 0;
+	goForward (3, 370);
+	motor[mIntake] = 127;
+	goForward (12,200);
+	wait1Msec(1000);
+	motor[mIntake] = 0;
+	goForward(6,400);
 }
-
-
 void auton() {
-    //turn(127, 1200);
-    //return;
-    if (SensorValue[potAuton] < 1500) {
-        autonLeft();
-    } else if (SensorValue[potAuton] > 2700) {
-        autonRight();
-    }
+	//goForward (3, 4000);
+	//turn(127, 1200);
+	//return;
+	if (SensorValue[jumper] == 0) {
+		if(SensorValue[potAuton] < 1150) {
+			autonLeft();
+			} else if (SensorValue[potAuton] > 3000){
+			autonRight();
+		}
+	}
+	else {
+		if(SensorValue[potAuton] < 1150) {
+			autonBackLeft();
+			} else if (SensorValue[potAuton] > 3000){
+			autonBackRight();
+		}
+
+	}
+	// else if (SensorValue[potAuton] > 2700) {
+	//    autonRight();
+	//}
 }
+
 
 task autonomous() {
-	    auton();
+	auton();
 }
 
 // USER CONTROL
@@ -213,13 +366,13 @@ task LED_Update () {
 	while (true) {
 		if (flyWheelSpeed == 127 || flyWheelSpeed == 127) {
 			SensorValue[LED] = 0;
-		} else if (flyWheelSpeed > __FLYWHEEL_SECONDARY_SPEED) {
+			} else if (flyWheelSpeed > __FLYWHEEL_SECONDARY_SPEED) {
 			SensorValue[LED] = LEDFlashStatus;
 			LEDFlashStatus = 1 - LEDFlashStatus;
 			wait1Msec(100);
-		} else if (flyWheelSpeed == __FLYWHEEL_SECONDARY_SPEED) {
+			} else if (flyWheelSpeed == __FLYWHEEL_SECONDARY_SPEED) {
 			SensorValue[LED] = 1;
-		} else if (flyWheelSpeed < __FLYWHEEL_SECONDARY_SPEED) {
+			} else if (flyWheelSpeed < __FLYWHEEL_SECONDARY_SPEED) {
 			SensorValue[LED] = LEDFlashStatus;
 			LEDFlashStatus = 1 - LEDFlashStatus;
 			wait1Msec(500);
@@ -232,9 +385,9 @@ task ballIntake () {
 	while (true) {
 		if (vexRT[Btn6U] && !vexRT[Btn6D]) {
 			motor[mIntake] = 127;
-		} else if (!vexRT[Btn6U] && vexRT[Btn6D]) {
+			} else if (!vexRT[Btn6U] && vexRT[Btn6D]) {
 			motor[mIntake] = -127;
-		} else {
+			} else {
 			motor[mIntake] = 0;
 		}
 		EndTimeSlice();
@@ -246,11 +399,11 @@ task flyWheel () {
 		motor[mFlyWheelL] = motor[mFlyWheelR] = flyWheelSpeed;
 		if (vexRT[Btn8U]) { // set full speed button pushed
 			flyWheelSpeed = 127;
-		} else if (vexRT[Btn8L]) { // set secondary speed button pushed
+			} else if (vexRT[Btn8L]) { // set secondary speed button pushed
 			flyWheelSpeed = __FLYWHEEL_SECONDARY_SPEED;
-		} else if (vexRT[Btn8D]) {
+			} else if (vexRT[Btn8D]) {
 			flyWheelSpeed = 0;
-		} else if (vexRT[Btn8R]) {
+			} else if (vexRT[Btn8R]) {
 			flyWheelSpeed = flyWheelSpeed_Memory;
 		}
 		if (vexRT[Btn6U] && vexRT[Btn6D]) {
@@ -261,7 +414,7 @@ task flyWheel () {
 				flyWheelSpeed_Memory += 10;
 				flyWheelSpeed_Memory = flyWheelSpeed_Memory > 127 ? 127 : flyWheelSpeed_Memory;
 				flyWheelSpeed = flyWheelSpeed_Memory;
-			} else if (vexRT[Btn8D]) {
+				} else if (vexRT[Btn8D]) {
 				while (vexRT[Btn8D]) {
 					wait1Msec(10);
 				}
@@ -277,18 +430,16 @@ task lifter () { // task controlling the cascade-lift an the claw
 	while (true) {
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
 			motor[mLift] = 0;
-		}	else if (vexRT[Btn5U]) {
+			}	else if (vexRT[Btn5U]) {
 			motor[mLift] = 127;
-		} else if (vexRT[Btn5D]) {
+			} else if (vexRT[Btn5D]) {
 			motor[mLift] = -127;
-		} else {
+			} else {
 			motor[mLift] = 0;
 		}
 		EndTimeSlice();
 	}
 }
-
-bool clawInAction = false;
 
 void moveClawUp (int toPos) {
 	clawInAction = true;
@@ -315,13 +466,13 @@ void initClawMovement (int toPos) {
 	curClawPos = SensorValue[potClaw];
 	if (curClawPos < toPos) {
 		motor[mClaw] = 127;
-	} else if (curClawPos < toPos + 100) {
+		} else if (curClawPos < toPos + 100) {
 		motor[mClaw] = 60;//(toPos - curClawPos) / 2;
-	} else if (curClawPos < toPos + 227) {
+		} else if (curClawPos < toPos + 227) {
 		motor[mClaw] = 10;//(curClawPos - toPos) * 1;
-	} else if (curClawPos < toPos + 500) {
+		} else if (curClawPos < toPos + 500) {
 		motor[mClaw] = 0;
-	} else {
+		} else {
 		motor[mClaw] = -10;
 	}
 }
@@ -330,7 +481,7 @@ void flipOnBot () {
 	clawInAction = true;
 	while (true) {
 		if ((vexRT[Btn5U] && vexRT[Btn5D]) && (vexRT[Btn7U] || vexRT[Btn7D]) ||
-				 vexRT[Btn7U] || vexRT[Btn7R]) {
+			vexRT[Btn7U] || vexRT[Btn7R]) {
 			break;
 		}
 		initClawMovement (1950);
@@ -359,14 +510,14 @@ task claw () {
 			if (vexRT[Btn7U]) {
 				clawInManualControl = true;
 				motor[mClaw] = 127;
-			} else if (vexRT[Btn7D]) {
+				} else if (vexRT[Btn7D]) {
 				clawInManualControl = true;
 				motor[mClaw] = -127;
-			} else {
+				} else {
 				clawInManualControl = false;
 				motor[mClaw] = 0;
 			}
-		} else {
+			} else {
 			if (vexRT[Btn7R]) {
 				moveClawDown (600);
 			}
@@ -389,40 +540,40 @@ task drive() {
 	int vch1;
 	while (true) {
 		driveFactor = __DRIVE_SPEED_FACTOR_SLOW;
-    // Death zones
+		// Death zones
 		if (abs(vexRT[Ch4]) < 20 && abs(vexRT[Ch3]) < 20 && abs(vexRT[Ch1]) < 20) {
 			driveFactor = 0;
-		} else {
+			} else {
 			vch1 = vexRT[Ch1];
 			if (abs (vch1) < 100 && abs(vch1) > 20) {
 				vch1 = vch1 > 0 ? 60 : -60;
 			}
 			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vch1; //Determines motor speeds. Joshua's Code.
-      FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vch1;
-      BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vch1;
-      BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vch1;
+			FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vch1;
+			BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vch1;
+			BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vch1;
 
 			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 100 &&
-				 sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 100) {
+				sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 100) {
 				driveFactor = 0.5;
-			} else {
+				} else {
 				driveFactor = 1.0;
 			}
 
 		}
 		if (vexRT[Btn7L]) { // flip head
-    	while (vexRT[Btn7L]) { wait1Msec(10);}
-      headflip = -headflip;
-    }
+			while (vexRT[Btn7L]) { wait1Msec(10);}
+			headflip = -headflip;
+		}
 		// Make sure at least one of the motors is running at full spead
 		/*
 		maxMotor = ms[0];
 		for (i = 1; i < 4; ++i) {
-			maxMotor = fmax (ms[i], maxMotor);
+		maxMotor = fmax (ms[i], maxMotor);
 		}
 		targetRatio = 127.0 / maxMotor;
 		for (i = 0; i < 4; ++i) {
-			ms[i] *= targetRatio;
+		ms[i] *= targetRatio;
 		}
 		motor[mFL] = ms[0] * driveFactor;
 		motor[mFR] = ms[1] * driveFactor;
@@ -430,7 +581,7 @@ task drive() {
 		motor[mBR] = ms[3] * driveFactor;
 		*/
 
-    // Set each motor to a target speed
+		// Set each motor to a target speed
 		motor[mFL] = FL * driveFactor;
 		motor[mFR] = FR * driveFactor;
 		motor[mBL] = BL * driveFactor;
@@ -447,7 +598,7 @@ task usercontrol() {
 	startTask(claw);
 	startTask(clawAssist);
 	startTask(LED_Update);
-  while (true) {
-    EndTimeSlice();
-  }
+	while (true) {
+		EndTimeSlice();
+	}
 }

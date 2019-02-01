@@ -166,7 +166,7 @@ void FollowWallR (int direction, int distance) {
         }
 
         motor[mFR] = 127+adjR*(walldistR-SensorValue(sonR))
-		motor[mBR] = 127+adjR*(walldistR-SensorValue(sonR))
+	    	motor[mBR] = 127+adjR*(walldistR-SensorValue(sonR))
         motor[mFL] = -127+adjR*(walldistR-SensorValue(sonR))
         motor[mBL] = -127+adjR*(walldistR-SensorValue(sonR))
         EndTimeSlice();
