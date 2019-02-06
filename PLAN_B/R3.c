@@ -362,28 +362,46 @@ int flyWheelSpeed_Memory = __FLYWHEEL_SECONDARY_SPEED;
 float driveFactor = 1.0;
 float FL, FR, BL, BR, headflip = 1.0;
 
+/* Task to handle the Flywheel Speed LED */
 task LED_Update () {
 	int LEDFlashStatus = 0;
 	while (true) {
+        
+        /* If flywheels running full speed, LED is off */
 		if (flyWheelSpeed == 127 || flyWheelSpeed == 127) {
 			SensorValue[LED] = 0;
-			} else if (flyWheelSpeed > __FLYWHEEL_SECONDARY_SPEED) {
+            
+            
+        /* if FLywheels are running faster than half speed, LED blinks quickly (10 Hz) */
+        } else if (flyWheelSpeed > __FLYWHEEL_SECONDARY_SPEED) {
 			SensorValue[LED] = LEDFlashStatus;
 			LEDFlashStatus = 1 - LEDFlashStatus;
 			wait1Msec(100);
-			} else if (flyWheelSpeed == __FLYWHEEL_SECONDARY_SPEED) {
+            
+        /* if Flywheels are running at half speed, LED is solid */
+        } else if (flyWheelSpeed == __FLYWHEEL_SECONDARY_SPEED) {
 			SensorValue[LED] = 1;
-			} else if (flyWheelSpeed < __FLYWHEEL_SECONDARY_SPEED) {
+            
+            
+            
+        /* if Flywheels are runnign slower than half speed, LED blinks slowly (2 Hz) */
+        } else if (flyWheelSpeed < __FLYWHEEL_SECONDARY_SPEED) {
 			SensorValue[LED] = LEDFlashStatus;
 			LEDFlashStatus = 1 - LEDFlashStatus;
 			wait1Msec(500);
 		}
+        
+        
+        /* tell task handler done */
 		EndTimeSlice();
 	}
 }
 
+/* Task to run intake control */
 task ballIntake () {
 	while (true) {
+        
+        /* Basic Motor Control with two buttons */
 		if (vexRT[Btn6U] && !vexRT[Btn6D]) {
 			motor[mIntake] = 127;
 			} else if (!vexRT[Btn6U] && vexRT[Btn6D]) {
@@ -391,42 +409,83 @@ task ballIntake () {
 			} else {
 			motor[mIntake] = 0;
 		}
+        /* tell task handler done */
 		EndTimeSlice();
 	}
 }
 
+
+/* Control the Flywheel System */
+
 task flyWheel () {
 	while (true) {
+        
+        
+        /* Set flywheel motors to indicated speed (Defaults to off) */
+        
 		motor[mFlyWheelL] = motor[mFlyWheelR] = flyWheelSpeed;
+        
+        
+        /* Set Flywheel Speed variable depending on button pressed */
 		if (vexRT[Btn8U]) { // set full speed button pushed
 			flyWheelSpeed = 127;
-			} else if (vexRT[Btn8L]) { // set secondary speed button pushed
+        } else if (vexRT[Btn8L]) { // set secondary speed button pushed
 			flyWheelSpeed = __FLYWHEEL_SECONDARY_SPEED;
-			} else if (vexRT[Btn8D]) {
+        } else if (vexRT[Btn8D]) {  //Turn off flywheels
 			flyWheelSpeed = 0;
-			} else if (vexRT[Btn8R]) {
+        } else if (vexRT[Btn8R]) {  //set configured speed
 			flyWheelSpeed = flyWheelSpeed_Memory;
 		}
+        
+        
+        /* Configure Flywheel Memory Speed */
+        
 		if (vexRT[Btn6U] && vexRT[Btn6D]) {
+            
+            /* if increment button pressed */
 			if (vexRT[Btn8U]) {
+                
+                /* wait for button to be released */
 				while (vexRT[Btn8U]) {
 					wait1Msec(10);
 				}
+                
+                /* Increment Flywheel Speed */
 				flyWheelSpeed_Memory += 10;
+                
+                /* Bounds Check */
 				flyWheelSpeed_Memory = flyWheelSpeed_Memory > 127 ? 127 : flyWheelSpeed_Memory;
+                
+                /* set flywheel speed to selected speed */
 				flyWheelSpeed = flyWheelSpeed_Memory;
-				} else if (vexRT[Btn8D]) {
+                
+                
+            /* if decrement button pressed */
+            } else if (vexRT[Btn8D]) {
+                
+                /* wait for button to be released */
 				while (vexRT[Btn8D]) {
 					wait1Msec(10);
 				}
+                
+                /* decrement Flyweel Speed */
 				flyWheelSpeed_Memory -= 10;
+                
+                /* Bounds Check */
 				flyWheelSpeed_Memory = flyWheelSpeed_Memory < 0 ? 0 : flyWheelSpeed_Memory;
+                
+                /* set flywheel speed to selected speed */
 				flyWheelSpeed = flyWheelSpeed_Memory;
 			}
 		}
+        /* tell task handler done */
 		EndTimeSlice();
 	}
 }
+
+
+/* Manual Control for the Cap Lift (Depreciated)*/
+
 task lifter () { // task controlling the cascade-lift an the claw
 	while (true) {
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
@@ -442,26 +501,45 @@ task lifter () { // task controlling the cascade-lift an the claw
 	}
 }
 
+
+/* Move Claw Down to indicated Potentiometer Position*/
+
 void moveClawUp (int toPos) {
+    
+    /* Tell claw assist that claw is in use*/
 	clawInAction = true;
-	clearTimer(T1); // set timer in order to prevent burning out motors
+    
+     /* Set timer so claw can "timeout" to prevent motor breakage*/
+	clearTimer(T1);
 	while (SensorValue[potClaw] < toPos && time1[T1] < 3000) {
 		motor[mClaw] = 127;
 	}
 	motor[mClaw] = 0;
 	clawInAction = false;
 }
+
+/* Move Claw Down to indicated Potentiometer Position*/
 void moveClawDown (int toPos) {
+    
+    
+    /* Tell claw assist that claw is in use*/
+    
 	clawInAction = true;
-	clearTimer(T1); // set timer in order to prevent burning out motors
+ 
+    /* Set timer so claw can "timeout" to prevent motor breakage*/
+	clearTimer(T1);
 	while (SensorValue[potClaw] > toPos && time1[T1] < 3000) {
 		motor[mClaw] = -77;
 	}
 	motor[mClaw] = 0;
+
 	clawInAction = false;
 }
 
 int curClawPos;
+
+
+/* move claw to indicated position using pseudo-P control*/
 
 void initClawMovement (int toPos) {
 	curClawPos = SensorValue[potClaw];
@@ -478,7 +556,12 @@ void initClawMovement (int toPos) {
 	}
 }
 
+/* flip cap on the bot*/
 void flipOnBot () {
+    
+    
+    /* Tell claw assist that claw is in use*/
+    
 	clawInAction = true;
 	while (true) {
 		if ((vexRT[Btn5U] && vexRT[Btn5D]) && (vexRT[Btn7U] || vexRT[Btn7D]) ||
@@ -489,6 +572,8 @@ void flipOnBot () {
 	}
 	clawInAction = false;
 }
+
+/* prevent claw from moving when under load and raised */
 
 bool clawAssistOn = false, clawInManualControl = false;
 task clawAssist () {
@@ -505,8 +590,12 @@ task clawAssist () {
 	}
 }
 
+/* Task to handle the movement of the Claw*/     //Use Mutexes for this in future
+
 task claw () {
 	while (true) {
+        
+        /* Manual Control For Claw*/
 		if (vexRT[Btn5U] && vexRT[Btn5D]) {
 			if (vexRT[Btn7U]) {
 				clawInManualControl = true;
@@ -518,15 +607,24 @@ task claw () {
 				clawInManualControl = false;
 				motor[mClaw] = 0;
 			}
+            
+            /* Automatic Functions for claw */
+            
 			} else {
+            
+            /* Move Claw to lower posiiton*/
 			if (vexRT[Btn7R]) {
 				moveClawDown (600);
 			}
-			if (vexRT[Btn7U]) { // flip on ground
+            
+            /* Flip Cap on ground*/
+			if (vexRT[Btn7U]) {
 				moveClawUp (1500);
 				moveClawDown (600);
 			}
-			if (vexRT[Btn7D]) { // flip on bot
+                
+            /* Flip Cap on Bot (Depreciated)*/
+			if (vexRT[Btn7D]) {
 				//moveClawUp (2000); // change this number to change the target pot position
 				moveClawUp (2150);
 				motor[mClaw] = 0;
@@ -537,27 +635,39 @@ task claw () {
 	}
 }
 
+/* task to handle the movement of the X-drive Chassis*/
+
 task drive() {
 	int vch1;
 	while (true) {
+        /* Driving Speed Multiplier*/
 		driveFactor = __DRIVE_SPEED_FACTOR_SLOW;
-		// Death zones
-		if (abs(vexRT[Ch4]) < 20 && abs(vexRT[Ch3]) < 20 && abs(vexRT[Ch1]) < 20) {
-			driveFactor = 0;
+        
+        
+		/* Set Up Controller Deadzones*/
+		if (abs(vexRT[Ch4]) < 20 && abs(vexRT[Ch3]) < 20 && abs(vexRT[Ch1]) < 20) { //if joysticks are within 20 of zero
+			driveFactor = 0; //set driving speed multiplier to 0
 			} else {
-			vch1 = vexRT[Ch1];
-			if (abs (vch1) < 100 && abs(vch1) > 20) {
-				vch1 = vch1 > 0 ? 60 : -60;
-			}
-			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vch1; //Determines motor speeds. Joshua's Code.
+                
+            /* set up spining speed*/
+			vch1 = vexRT[Ch1];      //set variable for spinning channel
+			if (abs (vch1) < 100 && abs(vch1) > 20) {   //if spinning channel is between the lower bound and the full speed bound
+				vch1 = vch1 > 0 ? 60 : -60;     //set it to the half speed value (driving speed multiplier cuts this in half to quarter speed)
+        }
+                
+                
+                /* based on the values of the three input joysticks, calculate the intended speeds for each wheel*/
+			FR = (headflip * (-vexRT[Ch4] + vexRT[Ch3])) - vch1;
 			FL = (headflip * (-vexRT[Ch4] - vexRT[Ch3])) - vch1;
 			BL = (headflip * (vexRT[Ch4] - vexRT[Ch3])) - vch1;
 			BR = (headflip * (vexRT[Ch4] + vexRT[Ch3])) - vch1;
 
+                
+            /* if in the space between the deadzone and full speed set the power multiplier to half*/
 			if(sqrt((vexRT[Ch4] * vexRT[Ch4]) + (vexRT[Ch3] * vexRT[Ch3])) < 100 &&
 				sqrt((vexRT[Ch1] * vexRT[Ch1]) + (vexRT[Ch2] * vexRT[Ch2])) < 100) {
 				driveFactor = 0.5;
-				} else {
+				} else {    //else set full speed
 				driveFactor = 1.0;
 			}
 
@@ -566,23 +676,7 @@ task drive() {
 			while (vexRT[Btn7L]) { wait1Msec(10);}
 			headflip = -headflip;
 		}
-		// Make sure at least one of the motors is running at full spead
-		/*
-		maxMotor = ms[0];
-		for (i = 1; i < 4; ++i) {
-		maxMotor = fmax (ms[i], maxMotor);
-		}
-		targetRatio = 127.0 / maxMotor;
-		for (i = 0; i < 4; ++i) {
-		ms[i] *= targetRatio;
-		}
-		motor[mFL] = ms[0] * driveFactor;
-		motor[mFR] = ms[1] * driveFactor;
-		motor[mBL] = ms[2] * driveFactor;
-		motor[mBR] = ms[3] * driveFactor;
-		*/
-
-		// Set each motor to a target speed
+        /* apply the motor speed, multiplying the values by the power multiplier*/
 		motor[mFL] = FL * driveFactor;
 		motor[mFR] = FR * driveFactor;
 		motor[mBL] = BL * driveFactor;
@@ -591,11 +685,13 @@ task drive() {
 	}
 }
 
+
+/* Start All Tasks*/
 task usercontrol() {
 	startTask(drive);
 	startTask(ballIntake);
 	startTask(flyWheel);
-	startTask(lifter);
+	//startTask(lifter);
 	startTask(claw);
 	startTask(clawAssist);
 	startTask(LED_Update);
